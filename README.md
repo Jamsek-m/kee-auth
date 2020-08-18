@@ -1,9 +1,9 @@
 # KeeAuth Library
 
-[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/Jamsek-m/kumuluzee-keycloak-integration-lib)](https://github.com/Jamsek-m/kumuluzee-keycloak-integration-lib/releases)
-[![Last commit](https://img.shields.io/github/last-commit/Jamsek-m/kumuluzee-keycloak-integration-lib/master)](https://github.com/Jamsek-m/kumuluzee-keycloak-integration-lib/commits/master)
+[![Maven Central](https://img.shields.io/maven-central/v/com.mjamsek.auth/kee-auth)](https://mvnrepository.com/artifact/com.mjamsek.auth/kee-auth)
+[![Last commit](https://img.shields.io/github/last-commit/Jamsek-m/kee-auth/master)](https://github.com/Jamsek-m/kee-auth/commits/master)
 ![Build Status](https://jenkins.mjamsek.com/buildStatus/icon?job=kumuluzee-keycloak-integration-lib)
-[![GitHub license](https://img.shields.io/github/license/Jamsek-m/kumuluzee-keycloak-integration-lib)](https://github.com/Jamsek-m/kumuluzee-keycloak-integration-lib/blob/master/LICENSE)
+[![GitHub license](https://img.shields.io/github/license/Jamsek-m/kee-auth)](https://github.com/Jamsek-m/kee-auth/blob/master/LICENSE)
 
 > Library providing Keycloak Security for KumuluzEE framework
 
