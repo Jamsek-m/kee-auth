@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class AuthContextBuilder {
     
-    private AuthContext instance;
+    private final AuthContext instance;
     
     public static AuthContextBuilder newBuilder() {
         return new AuthContextBuilder();

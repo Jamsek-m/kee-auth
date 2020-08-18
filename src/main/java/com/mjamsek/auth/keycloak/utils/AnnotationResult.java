@@ -1,9 +1,9 @@
 package com.mjamsek.auth.keycloak.utils;
 
 public class AnnotationResult<T> {
-    private T annotation;
+    private final T annotation;
     
-    private boolean classAnnotated;
+    private final boolean classAnnotated;
     
     AnnotationResult(T annotation, boolean classAnnotated) {
         this.annotation = annotation;

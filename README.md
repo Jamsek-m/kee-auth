@@ -18,7 +18,7 @@ Import library in your project:
 <dependency>
     <groupId>com.mjamsek.auth</groupId>
     <artifactId>kee-auth</artifactId>
-    <version>${kumuluee-keycloak-lib.version}</version>
+    <version>${kee-auth.version}</version>
 </dependency>
 ``` 
 
@@ -89,7 +89,7 @@ public class SampleResource {
 * `@AuthenticatedAllowed`: to access this method a user must present valid JWT
 * `@RolesAllowed({"dev"})`: to access this method a user must have role 'dev' (either in realm or on any client)
 * `@RealmRolesAllowed({"dev"})`: to access this method a user must have **realm** role 'dev'
-* `@ClientRolesAllowed(client = "keycloak-client", roles = {"dev"})`: to access this method a user must have **client** role 'dev' on client 'kecloak-client'.
+* `@ClientRolesAllowed(client = "keycloak-client", roles = {"dev"})`: to access this method a user must have **client** role 'dev' on a client 'keycloak-client'.
 
 If you want to expose single method in otherwise protected resource class you 
 can use `@PublicResource` annotation on method, you want to make public.
@@ -112,7 +112,7 @@ private String rawToken;
 ```
 
 In unsecured (public) endpoints, authContext will not be available. 
-Therefore it is good practice to check if user is authenticated before 
+Therefore, it is good practice to check if user is authenticated before 
 using its methods:
 ```java
 if (authContext.isAuthenticated()) {
@@ -134,7 +134,7 @@ Auth context provides following data:
 
 ### Keycloak client
 
-Library also provides client to perform service calls to keycloak server.
+Library also provides a client to perform service calls to keycloak server.
 
 To use it, configuration key `keycloak.auth.client-secret` must be provided.
 Additionally, configured client must be **confidential** and service account 

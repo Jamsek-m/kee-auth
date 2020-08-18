@@ -103,7 +103,7 @@ public class KeycloakClient {
     }
     
     static class TokenRepresentation {
-        String rawToken;
+        final String rawToken;
         KeycloakJsonWebToken parsedToken;
         
         TokenRepresentation(String token) throws VerificationException {

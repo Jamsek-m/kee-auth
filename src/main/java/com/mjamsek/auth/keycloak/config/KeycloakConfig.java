@@ -117,7 +117,7 @@ public class KeycloakConfig {
     
     /**
      * Get leeway for token expiration check
-     * @return num of miliseconds of leeway
+     * @return num of milliseconds of leeway
      */
     public synchronized Integer getLeeway() {
         return leeway;

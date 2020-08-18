@@ -33,7 +33,7 @@ public class KeycloakErrorResponse {
         UNKNOWN_ERROR("unknown_error"),
         GENERIC_ERROR("");
         
-        private String value;
+        private final String value;
         
         Code(String value) {
             this.value = value;

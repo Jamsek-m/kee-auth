@@ -75,15 +75,9 @@ public class KeycloakInitializator {
         config.publicKey = providedPublicCert.map(CertUtil::getPublicKeyFromCertificate).orElse(null);
         
         // register subscription to credentials
-        configUtil.subscribe(ConfigKeys.CLIENT_SECRET, (key, value) -> {
-            KeycloakConfig.getInstance().clientSecret = value;
-        });
-        configUtil.subscribe(ConfigKeys.SECRET_KEY, (key, value) -> {
-            KeycloakConfig.getInstance().secretKey = CertUtil.getSecretKeyFromString(value);
-        });
-        configUtil.subscribe(ConfigKeys.PUBLIC_CERT, (key, value) -> {
-            KeycloakConfig.getInstance().publicKey = CertUtil.getPublicKeyFromCertificate(value);
-        });
+        configUtil.subscribe(ConfigKeys.CLIENT_SECRET, (key, value) -> KeycloakConfig.getInstance().clientSecret = value);
+        configUtil.subscribe(ConfigKeys.SECRET_KEY, (key, value) -> KeycloakConfig.getInstance().secretKey = CertUtil.getSecretKeyFromString(value));
+        configUtil.subscribe(ConfigKeys.PUBLIC_CERT, (key, value) -> KeycloakConfig.getInstance().publicKey = CertUtil.getPublicKeyFromCertificate(value));
         // set verifier strategy based on algorithm
         config.verifier = TokenVerifierBuilder.create(algorithm);
         
