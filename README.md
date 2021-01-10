@@ -220,7 +220,7 @@ Sample can be found on [this page](https://github.com/Jamsek-m/examples/tree/mas
 
 ### 401 response
 
-On 401 response, Jetty throws ProcessingException, due to which response is not processed by registered mappers.
+When using KumuluzEE MP Rest Client if server returns 401 Jetty will throw ProcessingException, due to which response is not processed by registered mappers. [Read for workaround.](https://github.com/kumuluz/kumuluzee-rest-client#known-issues)
 
 
 ## Changelog
