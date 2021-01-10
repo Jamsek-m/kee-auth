@@ -213,7 +213,7 @@ public class AccountService {
 
 ## Sample
 
-Sample can be found on [this page](https://github.com/Jamsek-m/examples/tree/master/javaee/kumuluzee/kumuluzee-keycloak-integration-lib-sample)
+Samples can be found on [this page](https://github.com/Jamsek-m/examples/tree/master/kee-auth)
 
 ## Known issues
 
