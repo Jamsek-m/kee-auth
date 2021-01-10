@@ -225,7 +225,7 @@ On 401 response, Jetty throws ProcessingException, due to which response is not 
 
 ## Changelog
 
-Changes can be viewed on [releases page](https://github.com/Jamsek-m/kumuluzee-keycloak-integration-lib/releases) on GitHub.
+Changes can be viewed on [releases page](https://github.com/Jamsek-m/kee-auth/releases) on GitHub.
 
 ## License
 
