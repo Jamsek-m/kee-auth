@@ -22,6 +22,17 @@ Import library in your project:
 </dependency>
 ``` 
 
+You must also provide Kecloak Jetty adapter, matching version of your Keycloak server:
+```xml
+<dependency>
+    <groupId>org.keycloak</groupId>
+    <artifactId>keycloak-jetty94-adapter</artifactId>
+    <version>${keycloak.version}</version>
+</dependency>
+```
+
+### Configuration
+
 Provide configuration values in `config.yml`:
 
 ```yaml
@@ -30,6 +41,7 @@ keycloak:
   realm: keycloak-realm
   auth-server-url: https://keycloak.example.com/auth
   client-id: keycloak-client
+  # Optional options
   auth:
     # Confidential clients need this to perform service calls
     client-secret: <client_secret>
@@ -39,6 +51,10 @@ keycloak:
     # If it is not provided, it will be fetched from Keycloak's well-known endpoint.
     cert: <cert>
 ```
+
+For Keycloak client of type **bearer only** you only need to provide mandatory options (`realm`, `auth-server-url` and `client-id`).
+
+If you need to perform service calls to Keycloak or want to setup service as **confidential** client, you also need to provide `client-secret` option.
 
 ### Authentication and authorization
 
@@ -86,7 +102,7 @@ public class SampleResource {
 
 #### Annotation types:
 
-* `@AuthenticatedAllowed`: to access this method a user must present valid JWT
+* `@AuthenticatedAllowed`: to access this method a user (any valid user) must present valid JWT
 * `@RolesAllowed({"dev"})`: to access this method a user must have role 'dev' (either in realm or on any client)
 * `@RealmRolesAllowed({"dev"})`: to access this method a user must have **realm** role 'dev'
 * `@ClientRolesAllowed(client = "keycloak-client", roles = {"dev"})`: to access this method a user must have **client** role 'dev' on a client 'keycloak-client'.
