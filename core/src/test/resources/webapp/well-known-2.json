@@ -1,0 +1,5 @@
+{
+  "issuer": "https://test.idp.com",
+  "token_endpoint": "https://test.idp.com/token",
+  "jwks_uri": "https://test.idp.com/jwks"
+}

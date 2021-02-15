@@ -1,0 +1,5 @@
+kee-auth:
+  clients:
+    internal-client-1: external-client-1
+    internal-client-2: external-client-2
+    internal-client-4: external-client-4

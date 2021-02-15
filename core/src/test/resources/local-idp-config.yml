@@ -1,0 +1,7 @@
+kumuluzee:
+  server:
+    http:
+      port: 44444
+kee-auth:
+  oidc:
+    well-known-url: http://localhost:44444/well-known.json

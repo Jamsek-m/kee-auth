@@ -1,0 +1,47 @@
+pipeline {
+
+    agent any
+
+    tools {
+        maven "mvn-3.6"
+        jdk "jdk-13"
+    }
+
+    environment {
+        commitAuthor = ""
+    }
+
+    stages {
+        stage("Cloning git") {
+            steps {
+                git branch: "master",
+                        credentialsId: "github-username",
+                        url: "https://github.com/Jamsek-m/kee-auth.git"
+
+            }
+        }
+        stage("Seting environment") {
+            steps {
+                script {
+                    sh "git --no-pager show -s --format='%ae' > COMMIT_INFO"
+                    commitAuthor = readFile("COMMIT_INFO").trim()
+                }
+            }
+        }
+        stage("Packaging application") {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'nexus-username', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+                    sh "mvn clean deploy -Dci.nexus.user=$USERNAME -Dci.nexus.pass=$PASSWORD --settings .ci/settings.xml"
+                }
+            }
+        }
+    }
+    post {
+        success {
+            slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' from ${commitAuthor} (${env.BUILD_URL})")
+        }
+        failure {
+            slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' from ${commitAuthor} (${env.BUILD_URL})")
+        }
+    }
+}

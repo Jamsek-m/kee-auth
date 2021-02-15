@@ -1,0 +1,4 @@
+kee-auth:
+  oidc:
+    well-known-url: http://localhost:44444/well-known-2.json
+    jwks-url: http://localhost:44444/jwks.json
