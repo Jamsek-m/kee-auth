@@ -21,7 +21,6 @@ public class ConfigKeys {
     public static final String CLAIM_MAPPING_ID = "kee-auth.jwt.claims.id";
     public static final String CLAIM_MAPPING_EMAIL = "kee-auth.jwt.claims.email";
     public static final String CLAIM_MAPPING_USERNAME = "kee-auth.jwt.claims.username";
-    public static final String CLAIM_MAPPING_ROLES = "kee-auth.jwt.claims.roles";
     public static final String CLAIM_MAPPING_SCOPE = "kee-auth.jwt.claims.scope";
     // Keys
     public static final String KEY_KID_POSTFIX = "kid";
@@ -35,6 +34,7 @@ public class ConfigKeys {
     public static final String KEY_Y_POSTFIX = "y";
     
     // Resolvers
+    public static final String CLAIM_MAPPING_ROLES = "kee-auth.role-resolvers.default.roles-mapping";
     public static final String RESOLVER_ENABLED_PREFIX = "kee-auth.role-resolvers";
     public static final String RESOLVER_ENABLED_POSTFIX = "enabled";
     

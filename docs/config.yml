@@ -15,14 +15,13 @@ kee-auth:
       token-url: https://keycloak.example.com/auth/realms/kee-auth-test/protocol/openid-connect/token
   jwt:
     # leeway when checking token expiration
-    time-leeway: 1000
+    time-leeway: 1
     # claim mappings (with default values)
     claims:
       id: sub
       email: email
       username: preferred_username
       scope: scope
-      roles: roles
     keys:
       - kid: g7j
         alg: HS256
@@ -41,6 +40,7 @@ kee-auth:
         y: 'K5W777lR8cRZFOg7aUhAJY9_T1Is3oTo6LHr43gsA'
   role-resolvers:
     default:
+      roles-mapping: roles
       enabled: true
     keycloak:
       enabled: true
