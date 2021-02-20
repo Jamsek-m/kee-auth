@@ -1,6 +1,5 @@
 # KeeAuth Library
-
-![[beta](#beta-projects)](https://img.shields.io/badge/status-beta-bf9b1b)
+[![beta](https://img.shields.io/badge/status-beta-bf9b1b)](#beta-projects)
 [![Last commit](https://img.shields.io/github/last-commit/Jamsek-m/kee-auth/feature/v2)](https://github.com/Jamsek-m/kee-auth/commits/master)
 [![GitHub license](https://img.shields.io/github/license/Jamsek-m/kee-auth)](https://github.com/Jamsek-m/kee-auth/blob/master/LICENSE)
 > Library providing OpenId Connect security for KumuluzEE framework
