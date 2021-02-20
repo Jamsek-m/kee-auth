@@ -203,6 +203,17 @@ Auth context provides following data:
 * other claims from token
 * raw token
 
+### Creating context manually
+
+If for some reason, you cannot use CDI, you can also manually construct `AuthContext`:
+
+```java
+String jwt = "..."; // JWT from request
+AuthContext context = ContextProducer.produceContext(jwt);
+```
+
+If for some reason, context cannot be constructed (i.e. expired jwt), it will return empty context (authenticated flag is set to false).
+
 ## Client credentials flow
 
 KeeAuth provides client for performing calls with client credentials flow.
