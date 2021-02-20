@@ -2,6 +2,7 @@ package com.mjamsek.auth.context;
 
 import io.jsonwebtoken.Claims;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class AuthContext {
@@ -79,22 +80,22 @@ public class AuthContext {
             this.instance.tokenPayload = payload;
             return this;
         }
-    
+        
         public Builder id(String id) {
             this.instance.id = id;
             return this;
         }
-    
+        
         public Builder username(String username) {
             this.instance.username = username;
             return this;
         }
-    
+        
         public Builder email(String email) {
             this.instance.email = email;
             return this;
         }
-    
+        
         public Builder authenticated(boolean authenticated) {
             this.instance.authenticated = authenticated;
             return this;
@@ -103,9 +104,13 @@ public class AuthContext {
         public Builder scope(String scopes) {
             return this.scope(scopes, " ");
         }
-    
+        
         public Builder scope(String scopes, String delimitor) {
-            this.instance.scope = Set.of(scopes.split(delimitor));
+            if (scopes == null || scopes.isBlank()) {
+                this.instance.scope = new HashSet<>();
+            } else {
+                this.instance.scope = Set.of(scopes.split(delimitor));
+            }
             return this;
         }
         

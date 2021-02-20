@@ -1,4 +1,4 @@
-package com.mjamsek.auth.tests.tests.utils;
+package com.mjamsek.auth.tests.utils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwsHeader;

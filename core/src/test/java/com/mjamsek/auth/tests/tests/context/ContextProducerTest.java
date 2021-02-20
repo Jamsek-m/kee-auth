@@ -2,12 +2,9 @@ package com.mjamsek.auth.tests.tests.context;
 
 import com.mjamsek.auth.context.AuthContext;
 import com.mjamsek.auth.producers.ContextProducer;
-import com.mjamsek.auth.tests.tests.utils.TestJwtSigningKeyResolver;
-import com.mjamsek.auth.utils.TokenUtil;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.DefaultJwtBuilder;
-import io.jsonwebtoken.jackson.io.JacksonSerializer;
 import io.jsonwebtoken.security.Keys;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -19,12 +16,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 @RunWith(Arquillian.class)
 public class ContextProducerTest {
@@ -32,30 +29,30 @@ public class ContextProducerTest {
     private static final String TOKEN_SUBJECT = "123456";
     private static final String TOKEN_KID = "ac451sd4";
     private static final String TOKEN_ISS = "https://localhost:8090/auth";
+    private static final String TOKEN_EMAIL = "john.smith@mail.com";
     private static final List<String> roles = List.of("user", "dev");
     
     @Deployment
     public static JavaArchive createDeployment1() {
         return ShrinkWrap.create(JavaArchive.class)
-            .addClass(JacksonSerializer.class)
-            .addClass(TokenUtil.class)
             .addClass(Jwts.class)
             .addClass(Keys.class)
-            .addClass(TestJwtSigningKeyResolver.class)
             .addClass(DefaultJwtBuilder.class)
+            .addClass(ContextProducer.class)
+            .addAsResource("context-config.yml", "config.yml")
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
     }
-    
-    private SecretKey secretKey;
     
     private String jwt;
     
     @Before
     public void init() {
-        this.secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+        SecretKey secretKey = Keys.hmacShaKeyFor("secretsecretsecretsecretsecretsecretkey".getBytes(StandardCharsets.UTF_8));
         
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", roles);
+        claims.put("email", TOKEN_EMAIL);
+        
         this.jwt = Jwts.builder()
             .setSubject(TOKEN_SUBJECT)
             .setIssuer(TOKEN_ISS)
@@ -75,6 +72,19 @@ public class ContextProducerTest {
         assertNull(context.getScope());
         assertNull(context.getUsername());
         assertNull(context.getTokenPayload());
+    }
+    
+    @Test
+    public void actualContext() {
+        AuthContext context = ContextProducer.produceContext(this.jwt);
+        assertTrue(context.isAuthenticated());
+        assertEquals(TOKEN_SUBJECT, context.getId());
+        assertEquals(TOKEN_EMAIL, context.getEmail());
+        
+        Claims claims = context.getTokenPayload();
+        assertEquals(TOKEN_SUBJECT, claims.getSubject());
+        assertEquals(TOKEN_ISS, claims.getIssuer());
+        assertEquals(roles, claims.get("roles"));
     }
     
 }

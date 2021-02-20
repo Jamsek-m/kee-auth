@@ -1,0 +1,7 @@
+kee-auth:
+  autoconfigure: false
+  jwt:
+    keys:
+      - kid: ac451sd4
+        alg: HS256
+        secret: secretsecretsecretsecretsecretsecretkey

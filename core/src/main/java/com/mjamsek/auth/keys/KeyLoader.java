@@ -7,16 +7,18 @@ import com.mjamsek.auth.models.JsonWebKey;
 import com.mjamsek.auth.models.keys.HmacJwtKey;
 import com.mjamsek.auth.models.keys.JwtSigningKey;
 import com.mjamsek.auth.models.keys.RsaJwtKey;
+import io.jsonwebtoken.security.WeakKeyException;
 
 import java.security.spec.InvalidKeySpecException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class KeyLoader {
     
     private static final Logger LOG = Logger.getLogger(KeyLoader.class.getName());
-    
     
     private static final Set<VerificationAlgorithm> RSA_SET = Set.of(VerificationAlgorithm.RS256, VerificationAlgorithm.RS384, VerificationAlgorithm.RS512);
     private static final Set<VerificationAlgorithm> HMAC_SET = Set.of(VerificationAlgorithm.HS256, VerificationAlgorithm.HS384, VerificationAlgorithm.HS512);
@@ -58,6 +60,9 @@ public class KeyLoader {
                 }
             } catch (IllegalArgumentException e) {
                 LOG.warning("Unknown algorithm '" + jsonWebKey.getAlg() + "'! Skipping this key...");
+            } catch (WeakKeyException e) {
+                LOG.warning(e.getMessage());
+                LOG.warning("Skipping this key...");
             } catch (InvalidKeySpecException e) {
                 LOG.warning("Invalid key spec '" + jsonWebKey.getKid() + "'! " + e.getMessage() + " Skipping this key...");
                 e.printStackTrace();
@@ -113,10 +118,6 @@ public class KeyLoader {
         }
         
         return jsonWebKeys;
-    }
-    
-    public static List<JsonWebKey> loadKeysFromJwksUrl() {
-        return null;
     }
     
 }

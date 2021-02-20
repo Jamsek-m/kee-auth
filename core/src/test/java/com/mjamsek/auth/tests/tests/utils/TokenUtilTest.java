@@ -1,5 +1,6 @@
 package com.mjamsek.auth.tests.tests.utils;
 
+import com.mjamsek.auth.tests.utils.TestJwtSigningKeyResolver;
 import com.mjamsek.auth.utils.TokenUtil;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.impl.DefaultJwtBuilder;
