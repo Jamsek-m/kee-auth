@@ -2,7 +2,7 @@
 ![Status](https://img.shields.io/badge/status-beta-bf9b1b)
 [![Last commit](https://img.shields.io/github/last-commit/Jamsek-m/kee-auth/feature/v2)](https://github.com/Jamsek-m/kee-auth/commits/master)
 [![GitHub license](https://img.shields.io/github/license/Jamsek-m/kee-auth)](https://github.com/Jamsek-m/kee-auth/blob/master/LICENSE)
-> Library providing OpenId Connect Security for KumuluzEE framework
+> Library providing OpenId Connect security for KumuluzEE framework
 
 #### Version 1.x.x
 If you are looking for version `1.x.x` of KeeAuth, go to [1.x.x branch](https://github.com/Jamsek-m/kee-auth/tree/archive/1.x.x)
@@ -14,7 +14,7 @@ Library is compatible with Java 11+
 
 ## Usage
 
-> Project is still in beta. [See](#beta-projects).
+> Project is still in beta. See [beta projects](#beta-projects).
 
 Import library in your project:
 ```xml
