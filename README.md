@@ -76,7 +76,7 @@ kee-auth:
 ```
 
 #### Token claims mapping
-If your claims are not mapped by OIDC specifications, you can provide your own mappings for AuthContext:
+If your token claims are not mapped according to OIDC specification, you can provide your own mappings for AuthContext:
 
 ```yaml
 kee-auth:
@@ -151,11 +151,18 @@ public class SampleResource {
 
 ### Annotation types
 * `@AuthenticatedAllowed`: to access this method a user (any valid user) must present valid JWT
-* `@RolesAllowed({"dev"})`: to access this method a user must have role 'dev'
-* `@RolesAllowed(value = {"dev"}, clientName = "test-service")`: to access this method a user must have role 'dev' on a specified client (if identity provider supports it)
+* `@RolesAllowed({"dev"})`: to access this method a user must have role 'dev' [1]
+* `@RolesAllowed(value = {"dev"}, clientName = "test-service")`: to access this method a user must have role 'dev' on a specified client (if identity provider supports it) [1]
 
 If you want to expose single method in otherwise protected resource class you
 can use `@PublicResource` annotation on method, you want to make public.
+
+[1]: More in [resolvers](#roles-resolvers).
+
+## Roles resolvers
+Roles are resolved using role resolver. Library comes pre-packaged with default implementation of role resolver, however, you can also use another provided resolver, or write your own. 
+
+[Read more](/resolvers/README.md)
 
 ## Security context
 
@@ -260,3 +267,5 @@ For beta projects you need to include repository in your `pom.xml`:
     </repository>
 </repositories>
 ```
+
+No credentials are required.
