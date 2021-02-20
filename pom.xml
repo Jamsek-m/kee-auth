@@ -157,26 +157,18 @@
 
     <profiles>
         <profile>
-            <id>mjamsek-snapshot</id>
+            <id>mjamsek-beta</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
             <distributionManagement>
                 <repository>
-                    <id>mjamsek-snapshots</id>
-                    <url>https://nexus.mjamsek.com/repository/maven-snapshots</url>
+                    <id>mjamsek-beta</id>
+                    <url>https://nexus.mjamsek.com/repository/mjamsek-beta</url>
                 </repository>
             </distributionManagement>
         </profile>
-        <profile>
-            <id>mjamsek-release</id>
-            <distributionManagement>
-                <repository>
-                    <id>mjamsek-releases</id>
-                    <url>https://nexus.mjamsek.com/repository/maven-releases</url>
-                </repository>
-            </distributionManagement>
-        </profile>
+
         <profile>
             <id>ossrh-release</id>
             <build>
