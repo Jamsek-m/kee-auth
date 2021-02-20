@@ -209,7 +209,7 @@ If for some reason, you cannot use CDI, you can also manually construct `AuthCon
 
 ```java
 String jwt = "..."; // JWT from request
-AuthContext context = ContextProducer.produceContext(jwt);
+AuthContext context = KeeAuth.createContext(jwt);
 ```
 
 If for some reason, context cannot be constructed (i.e. expired jwt), it will return empty context (authenticated flag is set to false).

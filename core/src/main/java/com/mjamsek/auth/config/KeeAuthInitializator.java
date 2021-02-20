@@ -35,7 +35,7 @@ public class KeeAuthInitializator {
                 LOG.severe("Unable to retrieve configuration from .well-known endpoint! " + e.getMessage());
             } catch (MissingConfigException e) {
                 LOG.warning(e.getMessage());
-                LOG.warning("Fallback to local config.");
+                LOG.warning("Falling back to using local configuration.");
             }
             try {
                 // Retrieve JWKS
@@ -48,13 +48,15 @@ public class KeeAuthInitializator {
                 LOG.severe("Unable to retrieve keys from jwks endpoint! " + e.getMessage());
                 return;
             } catch (MissingConfigException e) {
-                LOG.warning(e.getMessage());
-                LOG.warning("Fallback to locally provided keys.");
+                LOG.info(e.getMessage());
+                LOG.info("Falling back to using only locally provided keys.");
                 return;
             }
             
             LOG.info("KeeAuth autoconfiguration complete!");
         }).exceptionally(throwable -> {
+            LOG.severe("Error occurred during autoconfiguration!");
+            LOG.severe(throwable.getMessage());
             throwable.printStackTrace();
             return null;
         });

@@ -21,6 +21,11 @@ public class ContextProducer {
     private static final String CLAIM_KEY_EMAIL = "email";
     private static final String CLAIM_KEY_SCOPE = "scope";
     
+    /**
+     * Produce context from given jwt
+     * @param jwt json web token
+     * @return context instance containing claims from given jwt
+     */
     public static AuthContext produceContext(String jwt) {
         try {
             Jws<Claims> tokenClaims = TokenUtil.parseJwt(jwt);
@@ -54,6 +59,10 @@ public class ContextProducer {
         return mappings;
     }
     
+    /**
+     * Produces empty context (unauthenticated user)
+     * @return context instance with authenticated flag set to false
+     */
     public static AuthContext produceEmptyContext() {
         return AuthContext.Builder.newEmptyContext();
     }
