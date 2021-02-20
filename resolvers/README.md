@@ -8,12 +8,14 @@ To disable specific resolver, set configuration key `kee-auth.role-resolvers.<re
 
 ## Default role resolver
 > Id: default
+
 > Priority: 0
 
 Expects claim to be of type array of strings. Claim name is `roles` by default, but can be configured by setting key `kee-auth.role-resolvers.default.roles-mapping`.
 
 ## Keycloak role resolver
 > Id: keycloak
+
 > Priority: 200
 
 To use Keycloak role resolver, you need to include the following in your `pom.xml`:
