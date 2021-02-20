@@ -214,6 +214,14 @@ AuthContext context = KeeAuth.createContext(jwt);
 
 If for some reason, context cannot be constructed (i.e. expired jwt), it will return empty context (authenticated flag is set to false).
 
+#### Parsing only JWT
+
+If you do not need auth context, you can also parse json web token to claims map:
+```java
+String jwt = "..."; // JWT from request
+Jws<Claims> tokenClaims = KeeAuth.parseJsonWebToken(jwt)
+```
+
 ## Client credentials flow
 
 KeeAuth provides client for performing calls with client credentials flow.
