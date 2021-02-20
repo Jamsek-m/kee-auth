@@ -232,7 +232,7 @@ kee-auth:
 
 ### Usage
 
-To use client for client credentials flow, use `IdentityProviderClient`, where you provide `Function` that receives one argument (that is access token) and returns retrieved data.
+To use client for client credentials flow, use `IdentityProviderClient#call`, where you provide `Function` that receives one argument (that is access token) and returns retrieved data.
 
 ```java
 public List<User> getAccounts() {
