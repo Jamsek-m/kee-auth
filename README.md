@@ -1,7 +1,12 @@
 # KeeAuth Library
+![Status](https://img.shields.io/badge/status-beta-bf9b1b)
 [![Last commit](https://img.shields.io/github/last-commit/Jamsek-m/kee-auth/feature/v2)](https://github.com/Jamsek-m/kee-auth/commits/master)
 [![GitHub license](https://img.shields.io/github/license/Jamsek-m/kee-auth)](https://github.com/Jamsek-m/kee-auth/blob/master/LICENSE)
 > Library providing OpenId Connect Security for KumuluzEE framework
+
+#### Version 1.x.x
+If you are looking for version `1.x.x` of KeeAuth, go to [1.x.x branch](https://github.com/Jamsek-m/kee-auth/tree/archive/1.x.x)
+
 
 ## Requirements
 
@@ -105,9 +110,144 @@ Currently only **Hmac with SHA-1** (HS256, HS384, HS512) and **RSA** (RS256, RS3
 
 ## Authentication and authorization
 
+To enable security in resource class, you must annotate it with `@SecureResource`. Then you can annotate methods in this class with appropriate annotations. You can also put annotations on class. This means that non-annotated methods will take class-based access level.
 
-## Old version
-[here](https://github.com/Jamsek-m/kee-auth/tree/archive/1.x.x)
+```java
+// Enable security in this class
+@SecureResource
+// All methods in this class need user to be authenticated (optional, you can put annotations on methods only)
+@AuthenticatedAllowed
+@RequestScoped
+@Path("/customers")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class SampleResource {
+    
+    @GET
+    // only admins or salesmen can retrieve list of customers
+    @RolesAllowed({"salesman", "admin"})
+    public Response getCustomers() {
+        // ... 
+        return Response.ok(customers).build();
+    }
+    
+    @GET
+    // This method uses class annotated access level - authentication only
+    public Response getCustomerDetails() {
+        // ... 
+        return Response.ok(customerDetails).build();
+    }
+    
+    @POST
+    // This method overrides class based annotation and is public - no authentication required
+    @PublicResource
+    public Response notifyCustomer() {
+        // ... 
+        return Response.ok().build();
+    }
+    
+}
+```
+
+### Annotation types
+* `@AuthenticatedAllowed`: to access this method a user (any valid user) must present valid JWT
+* `@RolesAllowed({"dev"})`: to access this method a user must have role 'dev'
+* `@RolesAllowed(value = {"dev"}, clientName = "test-service")`: to access this method a user must have role 'dev' on a specified client (if identity provider supports it)
+
+If you want to expose single method in otherwise protected resource class you
+can use `@PublicResource` annotation on method, you want to make public.
+
+## Security context
+
+### Security context
+
+You can retrieve data about user trying to access endpoint by injecting `AuthContext` object:
+
+```java
+@Inject
+private AuthContext authContext;
+```
+
+Alternatively, you can also retrieve raw token:
+
+```java
+@Inject
+@Token
+private String rawToken;
+```
+
+In unsecured (public) endpoints, authContext will not be available.
+Therefore, it is advisable to check if user is authenticated before
+using its methods:
+```java
+if (authContext.isAuthenticated()) {
+    // ...
+}
+``` 
+
+
+Auth context provides following data:
+
+* user id *(sub claim)*
+* username *(preferred_username claim)*
+* email *(email claim)*
+* scopes *(scope claim)*
+* authenticated flag
+* other claims from token
+* raw token
+
+## Client credentials flow
+
+KeeAuth provides client for performing calls with client credentials flow.
+
+### Configuration
+To configure client, you need to provide following configuration:
+```yaml
+kee-auth:
+  oidc:
+    client-credentials:
+      client-id: test-client
+      client-secret: e7820cf7-fbfb-4397-b156-91b15a2e3
+      # Can be omitted if autoconfiguration is enabled
+      token-url: https://keycloak.example.com/auth/realms/test-realm/protocol/openid-connect/token
+```
+
+### Usage
+
+To use client for client credentials flow, use `IdentityProviderClient`, where you provide `Function` that receives one argument (that is access token) and returns retrieved data.
+
+```java
+public List<User> getAccounts() {
+    String serviceCallUrl = "https://keycloak.example.com/auth/admin/realms/test-realm/users";
+    
+    return IdentityProviderClient.call(token -> {
+        Response response = ClientBuilder.newClient()
+            .target(serviceCallUrl)
+            .request(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer " + token)
+            .get();
+            
+        if (response.getStatus() >= 400) {
+            String error = response.readEntity(String.class);
+            LOG.error(error);
+            throw new ServerErrorException(500);
+        } else {
+            return response.readEntity(new GenericType<List<User>>() {});
+        }
+    });
+}
+```
+
+## Sample
+
+Samples can be found on [this page](https://github.com/Jamsek-m/examples/tree/master/kee-auth)
+
+## Changelog
+
+Changes can be viewed on [releases page](https://github.com/Jamsek-m/kee-auth/releases) on GitHub.
+
+## License
+MIT
 
 ## Beta projects
 For beta projects you need to include repository in your `pom.xml`:
