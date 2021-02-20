@@ -9,7 +9,7 @@ Library is compatible with Java 11+
 
 ## Usage
 
-> Project is still in beta
+> Project is still in beta. [See](#beta-projects).
 
 Import library in your project:
 ```xml
@@ -18,18 +18,6 @@ Import library in your project:
     <artifactId>kee-auth</artifactId>
     <version>2.0.0-SNAPSHOT</version>
 </dependency>
-```
-
-### Beta
-
-For beta projects you need to include repository in your `pom.xml`:
-```xml
-<repositories>
-    <repository>
-        <id>mjamsek-beta</id>
-        <url>https://nexus.mjamsek.com/repository/mjamsek-beta</url>
-    </repository>
-</repositories>
 ```
 
 ## Configuration
@@ -120,3 +108,15 @@ Currently only **Hmac with SHA-1** (HS256, HS384, HS512) and **RSA** (RS256, RS3
 
 ## Old version
 [here](https://github.com/Jamsek-m/kee-auth/tree/archive/1.x.x)
+
+## Beta projects
+For beta projects you need to include repository in your `pom.xml`:
+
+```xml
+<repositories>
+    <repository>
+        <id>mjamsek-beta</id>
+        <url>https://nexus.mjamsek.com/repository/mjamsek-beta</url>
+    </repository>
+</repositories>
+```
