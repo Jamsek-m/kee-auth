@@ -20,6 +20,8 @@
  */
 package com.mjamsek.auth;
 
+import com.mjamsek.auth.common.exceptions.HttpCallException;
+import com.mjamsek.auth.common.exceptions.MissingConfigException;
 import com.mjamsek.auth.config.KeeAuthInitializator;
 import com.mjamsek.auth.context.AuthContext;
 import com.mjamsek.auth.producers.ContextProducer;
@@ -59,15 +61,19 @@ public class KeeAuth {
     
     /**
      * Reloads well-known endpoint and updates configuration
+     * @throws MissingConfigException If no well-known endpoint was provided
+     * @throws HttpCallException If call to well-known endpoint fails for any reason
      */
-    public static void reloadWellKnownConfig() {
+    public static void reloadWellKnownConfig() throws MissingConfigException, HttpCallException {
         KeeAuthInitializator.loadWellKnownConfig();
     }
     
     /**
      * Reloads JWKS and updates configuration
+     * @throws MissingConfigException If no jwks endpoint was provided
+     * @throws HttpCallException If call to jwks endpoint fails for any reason
      */
-    public static void reloadJwks() {
+    public static void reloadJwks() throws MissingConfigException, HttpCallException {
         KeeAuthInitializator.loadJwks();
     }
 }

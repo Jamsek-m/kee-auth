@@ -86,11 +86,21 @@ public class KeeAuthInitializator {
         });
     }
     
+    /**
+     * Loads well-known configuration from well-known endpoint and stores it in configuration
+     * @throws MissingConfigException If no well-known endpoint was provided
+     * @throws HttpCallException If call to well-known endpoint fails for any reason
+     */
     public static void loadWellKnownConfig() throws MissingConfigException, HttpCallException {
         WellKnownConfig wellKnownConfig = IdentityProviderApi.getWellKnownConfig();
         KeeAuthConfig.setWellKnownConfig(wellKnownConfig);
     }
     
+    /**
+     * Loads JWKS from jwks endpoint and stores it in configuration
+     * @throws MissingConfigException If no jwks endpoint was provided
+     * @throws HttpCallException If call to jwks endpoint fails for any reason
+     */
     public static void loadJwks() throws MissingConfigException, HttpCallException {
         JsonWebKeySet jsonWebKeySet = IdentityProviderApi.getJsonWebKeySet();
         // Parse keys and store them
