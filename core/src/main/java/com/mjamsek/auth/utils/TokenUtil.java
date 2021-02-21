@@ -5,6 +5,10 @@ import com.mjamsek.auth.common.config.ConfigKeys;
 import com.mjamsek.auth.jwt.JwtSigningKeyResolver;
 import io.jsonwebtoken.*;
 
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 public class TokenUtil {
     
     public static String trimAuthorizationHeader(String authorizationHeaderValue) {

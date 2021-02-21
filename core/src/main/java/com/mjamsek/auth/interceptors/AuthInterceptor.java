@@ -10,6 +10,10 @@ import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 import javax.ws.rs.Priorities;
 
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 @SecureResource
 @Interceptor
 @Priority(Priorities.AUTHENTICATION)

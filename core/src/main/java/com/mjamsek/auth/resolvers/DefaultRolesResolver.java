@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 
 /**
  * Default resolver for roles. Expects role claim to be string array (default role claim is 'roles')
+ * @author Miha Jamsek
+ * @since 2.0.0
  */
 @ResolverDef(name = "default")
 public class DefaultRolesResolver implements RolesResolver {

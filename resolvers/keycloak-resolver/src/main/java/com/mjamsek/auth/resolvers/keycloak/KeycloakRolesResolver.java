@@ -13,6 +13,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 @ResolverDef(name = "keycloak")
 public class KeycloakRolesResolver implements RolesResolver {
     

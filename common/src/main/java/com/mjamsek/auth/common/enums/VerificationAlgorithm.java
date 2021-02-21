@@ -2,6 +2,10 @@ package com.mjamsek.auth.common.enums;
 
 import java.util.Set;
 
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 public enum VerificationAlgorithm {
     RS256,
     RS384,

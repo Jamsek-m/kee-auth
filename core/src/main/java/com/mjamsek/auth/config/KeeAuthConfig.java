@@ -9,6 +9,10 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 public class KeeAuthConfig {
     
     private static final AtomicReference<WellKnownConfig> wellKnownConfigAtomic = new AtomicReference<>(null);

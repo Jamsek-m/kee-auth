@@ -8,6 +8,8 @@ import java.lang.annotation.Target;
 
 /**
  * Enables security for resource class
+ * @author Miha Jamsek
+ * @since 2.0.0
  */
 @InterceptorBinding
 @Target({ElementType.TYPE})

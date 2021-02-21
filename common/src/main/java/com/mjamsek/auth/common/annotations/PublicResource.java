@@ -7,6 +7,8 @@ import java.lang.annotation.Target;
 
 /**
  * Exposes method as public in protected resource class
+ * @author Miha Jamsek
+ * @since 2.0.0
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

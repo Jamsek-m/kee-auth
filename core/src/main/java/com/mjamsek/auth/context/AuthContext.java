@@ -5,6 +5,10 @@ import io.jsonwebtoken.Claims;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 public class AuthContext {
     
     String id;

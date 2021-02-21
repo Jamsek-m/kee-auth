@@ -13,6 +13,10 @@ import com.mjamsek.auth.models.WellKnownConfig;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 public class KeeAuthInitializator {
     
     private static final Logger LOG = Logger.getLogger(KeeAuthInitializator.class.getName());

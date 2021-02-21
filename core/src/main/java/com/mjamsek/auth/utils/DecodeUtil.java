@@ -2,6 +2,10 @@ package com.mjamsek.auth.utils;
 
 import java.util.Base64;
 
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 public class DecodeUtil {
     
     public static byte[] base64Decode(String base64) {

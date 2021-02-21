@@ -9,6 +9,10 @@ import com.mjamsek.auth.config.KeeAuthInitializator;
 import javax.enterprise.context.ApplicationScoped;
 import java.util.logging.Logger;
 
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 @EeExtensionDef(name = "KeeAuth", group = EeExtensionGroup.SECURITY)
 @EeComponentDependencies({
     @EeComponentDependency(EeComponentType.SERVLET),

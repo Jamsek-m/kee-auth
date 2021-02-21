@@ -11,6 +11,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import java.util.Optional;
 
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 @RequestScoped
 public class ContextBeanProducer {
     

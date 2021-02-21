@@ -13,6 +13,10 @@ import io.jsonwebtoken.SigningKeyResolverAdapter;
 import java.security.Key;
 import java.util.Map;
 
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 public class JwtSigningKeyResolver extends SigningKeyResolverAdapter {
     
     // TODO: client error needs to throw 401/403

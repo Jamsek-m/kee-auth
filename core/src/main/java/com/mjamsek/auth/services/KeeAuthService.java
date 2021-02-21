@@ -4,6 +4,10 @@ import javax.interceptor.InvocationContext;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotAuthorizedException;
 
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 public interface KeeAuthService {
     
     /**

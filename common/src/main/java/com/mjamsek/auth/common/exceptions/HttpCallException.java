@@ -1,5 +1,9 @@
 package com.mjamsek.auth.common.exceptions;
 
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 public class HttpCallException extends RuntimeException {
     
     public HttpCallException(String message) {

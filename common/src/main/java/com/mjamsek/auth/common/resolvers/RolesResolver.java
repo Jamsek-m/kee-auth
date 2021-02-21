@@ -11,6 +11,11 @@ import java.util.Set;
 import static com.mjamsek.auth.common.config.ConfigKeys.RESOLVER_ENABLED_POSTFIX;
 import static com.mjamsek.auth.common.config.ConfigKeys.RESOLVER_ENABLED_PREFIX;
 
+/**
+ * Interface for resolving roles
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 public interface RolesResolver {
     
     int DEFAULT_PRIORITY = 100;

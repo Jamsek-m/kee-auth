@@ -8,6 +8,10 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 @SuppressWarnings("unused")
 public class KeeAuth {
     

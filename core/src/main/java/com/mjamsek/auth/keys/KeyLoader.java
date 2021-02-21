@@ -16,6 +16,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 public class KeyLoader {
     
     private static final Logger LOG = Logger.getLogger(KeyLoader.class.getName());

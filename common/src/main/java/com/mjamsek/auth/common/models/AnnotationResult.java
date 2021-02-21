@@ -1,5 +1,9 @@
 package com.mjamsek.auth.common.models;
 
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 public class AnnotationResult<T> {
     
     private final T annotation;

@@ -8,6 +8,8 @@ import java.lang.annotation.Target;
 
 /**
  * Allow only authenticated users with role to access annotated method
+ * @author Miha Jamsek
+ * @since 2.0.0
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

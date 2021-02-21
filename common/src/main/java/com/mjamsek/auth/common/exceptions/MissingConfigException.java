@@ -1,5 +1,9 @@
 package com.mjamsek.auth.common.exceptions;
 
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 public class MissingConfigException extends RuntimeException {
     
     public MissingConfigException(String key) {

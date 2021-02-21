@@ -8,6 +8,8 @@ import java.lang.annotation.Target;
 
 /**
  * Qualifier for injecting raw token string
+ * @author Miha Jamsek
+ * @since 2.0.0
  */
 @Qualifier
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})

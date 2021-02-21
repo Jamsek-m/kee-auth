@@ -15,6 +15,10 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Base64;
 
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 public class RsaJwtKey extends JwtSigningKey {
     
     protected final PublicKey publicKey;

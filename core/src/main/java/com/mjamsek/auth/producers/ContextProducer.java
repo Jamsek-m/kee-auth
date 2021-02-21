@@ -12,6 +12,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 public class ContextProducer {
     
     private static final Logger LOG = Logger.getLogger(ContextProducer.class.getName());

@@ -13,6 +13,8 @@ import java.util.logging.Logger;
 
 /**
  * Client for client credentials flow
+ * @author Miha Jamsek
+ * @since 2.0.0
  */
 public class IdentityProviderClient {
     

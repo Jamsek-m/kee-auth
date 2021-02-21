@@ -19,7 +19,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.logging.Logger;
 
-
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 public class IdentityProviderApi {
     
     private static final Logger LOG = Logger.getLogger(IdentityProviderApi.class.getName());

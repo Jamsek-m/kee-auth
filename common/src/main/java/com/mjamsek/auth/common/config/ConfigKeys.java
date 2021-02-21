@@ -1,5 +1,9 @@
 package com.mjamsek.auth.common.config;
 
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 public class ConfigKeys {
     
     // Clients

@@ -22,6 +22,10 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 @RequestScoped
 public class KeeAuthServiceImpl implements KeeAuthService {
     

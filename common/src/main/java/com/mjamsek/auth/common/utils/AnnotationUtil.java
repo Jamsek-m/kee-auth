@@ -8,6 +8,10 @@ import com.mjamsek.auth.common.models.AnnotationResult;
 
 import java.lang.reflect.Method;
 
+/**
+ * @author Miha Jamsek
+ * @since 2.0.0
+ */
 public class AnnotationUtil {
     
     public static AnnotationResult<RolesAllowed> getRolesAllowedAnnotation(Method method) {
