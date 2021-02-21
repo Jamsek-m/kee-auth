@@ -16,7 +16,7 @@
 
     <name>KeeAuth Library</name>
     <inceptionYear>2021</inceptionYear>
-    <description>Library providing Keycloak Security for KumuluzEE framework</description>
+    <description>Library providing OpenId Connect security for KumuluzEE framework</description>
     <url>https://github.com/Jamsek-m/kee-auth</url>
 
     <properties>
@@ -25,7 +25,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <kumuluzee.version>3.10.0</kumuluzee.version>
-        <jackson.version>2.9.10.4</jackson.version>
+        <jackson.version>2.9.10.8</jackson.version>
         <jjwt.version>0.11.2</jjwt.version>
         <javax-annotations.version>1.3.2</javax-annotations.version>
 
