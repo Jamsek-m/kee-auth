@@ -1,8 +1,8 @@
 # KeeAuth Library
 ![Build Status](https://jenkins.mjamsek.com/buildStatus/icon?job=kee-auth)
 [![beta](https://img.shields.io/badge/status-beta-bf9b1b)](#beta-projects)
-[![Last commit](https://img.shields.io/github/last-commit/Jamsek-m/kee-auth/feature/v2)](https://github.com/Jamsek-m/kee-auth/commits/master)
-[![GitHub license](https://img.shields.io/github/license/Jamsek-m/kee-auth)](https://github.com/Jamsek-m/kee-auth/blob/master/LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/Jamsek-m/kee-auth/feature/v2)](https://github.com/Jamsek-m/kee-auth/commits/feature/v2)
+[![GitHub license](https://img.shields.io/github/license/Jamsek-m/kee-auth)](https://github.com/Jamsek-m/kee-auth/blob/feature/v2/LICENSE)
 > Library providing OpenId Connect security for KumuluzEE framework
 
 #### Version 1.x.x
@@ -27,16 +27,6 @@ Import library in your project:
 ```
 
 ## Configuration
-
-### Client mapping
-You can provide optional client mapping to decouple client id with code.
-
-```yaml
-kee-auth:
-  clients:
-    client-name-1: client-id-1
-    client-name-2: client-id-2
-```
 
 ### OpenId Connect
 
@@ -107,7 +97,17 @@ kee-auth:
         alg: RS256
         x5c: 'MIIClTCCAX0CBgF3ISs0kjANBgkqhkiG9w0BAQsFADAOMQwwCgYDVQQDDANrcnYwHhcNMjEwMTIwMTg1ODM1WhcNMzEwMTIwMTkwMDE1WjAOMQwwCgYDVQQDDANrcnYwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCq3OOPcq4WV2sMveukiwqgSPPHAdARSbNA0egI/wJiID7b2r5Oq3yzQAuDmu4r5QfmkEnG2LES5gbSOQ1wcUs58nPjlbYtzWSNi05BuMwQN7CsIbakMNP6QFuOz8Zpo4g1B9Xl7UO6/0FikdJpC2uKf7J45fgu7lTqpNHO5Kj5s7b10HpWvkuPy+ERSbm9AT1Ha+wzVnJfAZXosvCL5w4VFl8SEqAeF+hTMa5moHgQjvgujI/K3FMOC4De1LPZ5xwAuNN1+ivTc1RIJ32qI4LXUUbDSBW16imWRbucfp1UzB9N8HIZvp9PNjLZjH/fSQI7rI3AAtB0O6Mk3GzZiffbAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAKAT+e2wVNEJld5CCtpqN13fvCJw7Yc2HZdeg648JqkrLOVyZltynMA2VG6NM4sDwQcH3Cb75nPcfND+rUrTSDiu0eQ3xfCh4pfsqvh8EEQ95yrGGm91McdGlNt24IUZNfGFzGZs/cCfuxoQUfpMCSSlVN/6SFpm8E5wHMYP9ALR+Aw8eVWMOOpDDzQWDZHo7lxkz4rMuaeWqOggAsdsrEblpWoU52Mxy02x+I8GUJdxjwL1atRI1yuUp7LkZ1O+NsdedOvHpUlDGRPIbF2VfeurrIIs0y2Pz1TdCR5eSxjVHPleiabaKjWft8qUysGGptTr+FmGj9KGad4L8='
 ```
-Currently only **Hmac with SHA-1** (HS256, HS384, HS512) and **RSA** (RS256, RS384, RS512) are supported algorithms for token verification.
+Currently, only **Hmac with SHA-1** (HS256, HS384, HS512) and **RSA** (RS256, RS384, RS512) are supported algorithms for token verification.
+
+### Client mapping
+You can provide optional client mapping to decouple client id with code.
+
+```yaml
+kee-auth:
+  clients:
+    client-name-1: client-id-1
+    client-name-2: client-id-2
+```
 
 ## Authentication and authorization
 
