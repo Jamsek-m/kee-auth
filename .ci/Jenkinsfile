@@ -8,23 +8,20 @@ pipeline {
     }
 
     environment {
-        commitAuthor = ""
+        COMMIT_AUTHOR = ""
+        COMMIT_MESSAGE = ""
+        PROJECT_VERSION = ""
     }
 
     stages {
-        stage("Cloning git") {
-            steps {
-                git branch: "feature/v2",
-                        credentialsId: "github-username",
-                        url: "https://github.com/Jamsek-m/kee-auth.git"
-
-            }
-        }
         stage("Seting environment") {
             steps {
                 script {
-                    sh "git --no-pager show -s --format='%ae' > COMMIT_INFO"
-                    commitAuthor = readFile("COMMIT_INFO").trim()
+                    pom = readMavenPom file:"pom.xml"
+                    PROJECT_VERSION = pom.version
+                    COMMIT_MESSAGE = sh script: "git show -s --pretty='%s'", returnStdout: true
+                    COMMIT_AUTHOR = sh script: "git show -s --pretty='%cn <%ce>'", returnStdout: true
+                    COMMIT_AUTHOR = COMMIT_AUTHOR.trim()
                 }
             }
         }
@@ -41,12 +38,13 @@ pipeline {
             }
         }
     }
+
     post {
         success {
-            slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' from ${commitAuthor} (${env.BUILD_URL})")
+            slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME}: ${COMMIT_MESSAGE} [${env.BUILD_NUMBER}]' from ${COMMIT_AUTHOR} (${env.BUILD_URL})")
         }
         failure {
-            slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' from ${commitAuthor} (${env.BUILD_URL})")
+            slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME}: ${COMMIT_MESSAGE} [${env.BUILD_NUMBER}]' from ${COMMIT_AUTHOR} (${env.BUILD_URL})")
         }
     }
 }
