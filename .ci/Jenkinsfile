@@ -14,7 +14,7 @@ pipeline {
     stages {
         stage("Cloning git") {
             steps {
-                git branch: "master",
+                git branch: "feature/v2",
                         credentialsId: "github-username",
                         url: "https://github.com/Jamsek-m/kee-auth.git"
 
