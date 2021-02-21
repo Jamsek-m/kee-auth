@@ -1,4 +1,5 @@
 # KeeAuth Library
+![Build Status](https://jenkins.mjamsek.com/buildStatus/icon?job=kee-auth)
 [![beta](https://img.shields.io/badge/status-beta-bf9b1b)](#beta-projects)
 [![Last commit](https://img.shields.io/github/last-commit/Jamsek-m/kee-auth/feature/v2)](https://github.com/Jamsek-m/kee-auth/commits/master)
 [![GitHub license](https://img.shields.io/github/license/Jamsek-m/kee-auth)](https://github.com/Jamsek-m/kee-auth/blob/master/LICENSE)
