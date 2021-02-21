@@ -241,13 +241,13 @@ kee-auth:
 
 ### Usage
 
-To use client for client credentials flow, use `IdentityProviderClient#call`, where you provide `Function` that receives one argument (that is access token) and returns retrieved data.
+To use client for client credentials flow, use `ServiceCallClient#call`, where you provide `Function` that receives one argument (that is access token) and returns retrieved data.
 
 ```java
 public List<User> getAccounts() {
     String serviceCallUrl = "https://keycloak.example.com/auth/admin/realms/test-realm/users";
     
-    return IdentityProviderClient.call(token -> {
+    return ServiceCallClient.call(token -> {
         Response response = ClientBuilder.newClient()
             .target(serviceCallUrl)
             .request(MediaType.APPLICATION_JSON)

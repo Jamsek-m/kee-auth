@@ -36,9 +36,9 @@ import java.util.logging.Logger;
  * @author Miha Jamsek
  * @since 2.0.0
  */
-public class IdentityProviderClient {
+public class ServiceCallClient {
     
-    private static final Logger LOG = Logger.getLogger(IdentityProviderClient.class.getName());
+    private static final Logger LOG = Logger.getLogger(ServiceCallClient.class.getName());
     
     private static final AtomicReference<TokenCache> accessTokenCache = new AtomicReference<>();
     
