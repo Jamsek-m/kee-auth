@@ -288,3 +288,5 @@ For beta projects you need to include repository in your `pom.xml`:
 ```
 
 No credentials are required.
+
+For more information about beta program, see [mjamsek.com/beta](https://mjamsek.com/en/beta).
