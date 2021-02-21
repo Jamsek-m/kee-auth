@@ -28,10 +28,15 @@ pipeline {
                 }
             }
         }
-        stage("Packaging application") {
+        stage("Run tests") {
+            steps {
+                sh "mvn clean test"
+            }
+        }
+        stage("Deploy library") {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'nexus-username', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
-                    sh "mvn clean deploy -Dci.nexus.user=$USERNAME -Dci.nexus.pass=$PASSWORD --settings .ci/settings.xml"
+                    sh "mvn clean deploy -Dci.nexus.user=$USERNAME -Dci.nexus.pass=$PASSWORD --settings .ci/settings.xml -DskipTests=true"
                 }
             }
         }
