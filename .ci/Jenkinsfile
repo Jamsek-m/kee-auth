@@ -11,6 +11,7 @@ pipeline {
         COMMIT_AUTHOR = ""
         COMMIT_MESSAGE = ""
         PROJECT_VERSION = ""
+        COMMIT_URL = ""
     }
 
     stages {
@@ -20,8 +21,10 @@ pipeline {
                     pom = readMavenPom file:"pom.xml"
                     PROJECT_VERSION = pom.version
                     COMMIT_MESSAGE = sh script: "git show -s --pretty='%s'", returnStdout: true
+                    COMMIT_MESSAGE = COMMIT_MESSAGE.trim()
                     COMMIT_AUTHOR = sh script: "git show -s --pretty='%cn <%ce>'", returnStdout: true
                     COMMIT_AUTHOR = COMMIT_AUTHOR.trim()
+                    COMMIT_URL = GIT_URL + "/commit/" + GIT_COMMIT
                 }
             }
         }
@@ -41,10 +44,10 @@ pipeline {
 
     post {
         success {
-            slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME}: ${COMMIT_MESSAGE} [${env.BUILD_NUMBER}]' from ${COMMIT_AUTHOR} (${env.BUILD_URL})")
+            slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME}' [<${env.BUILD_URL}|${env.BUILD_NUMBER}>]:\n'<${COMMIT_URL}|${COMMIT_MESSAGE}>' _from ${COMMIT_AUTHOR}_")
         }
         failure {
-            slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME}: ${COMMIT_MESSAGE} [${env.BUILD_NUMBER}]' from ${COMMIT_AUTHOR} (${env.BUILD_URL})")
+            slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME}' [<${env.BUILD_URL}|${env.BUILD_NUMBER}>]:\n'<${COMMIT_URL}|${COMMIT_MESSAGE}>' _from ${COMMIT_AUTHOR}_")
         }
     }
 }
