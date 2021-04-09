@@ -47,7 +47,7 @@ kee-auth:
   oidc:
     use-jwks: false
 ```
-or by providing own `jwks_url`:
+or by providing own `jwks_url` (endpoint from `well-known` config is then ignored):
 ```yaml
 kee-auth:
   oidc:
