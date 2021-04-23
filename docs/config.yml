@@ -13,6 +13,10 @@ kee-auth:
       client-id: kee-auth-test
       client-secret: e7820cf7-fbfb-4397-b156-91b15a2e3
       token-url: https://keycloak.example.com/auth/realms/kee-auth-test/protocol/openid-connect/token
+    credentials:
+      location: header # header | cookie
+      cookie-name: authorization
+      header-name: Authorization
   jwt:
     # leeway when checking token expiration
     time-leeway: 1

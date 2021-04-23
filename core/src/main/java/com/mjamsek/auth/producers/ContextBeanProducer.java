@@ -20,12 +20,14 @@
  */
 package com.mjamsek.auth.producers;
 
+import com.kumuluz.ee.configuration.utils.ConfigurationUtil;
 import com.mjamsek.auth.common.annotations.Token;
 import com.mjamsek.auth.context.AuthContext;
 import com.mjamsek.auth.utils.TokenUtil;
 
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Produces;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -38,13 +40,16 @@ import java.util.Optional;
 @RequestScoped
 public class ContextBeanProducer {
     
+    private static final String LOCATION_HEADER = "header";
+    private static final String LOCATION_COOKIE = "cookie";
+    
     @Context
     private HttpServletRequest httpRequest;
     
     @Produces
     @RequestScoped
     public AuthContext produceContext() {
-        return getAuthorizationHeaderValue()
+        return getCredentials()
             .map(ContextProducer::produceContext)
             .orElse(ContextProducer.produceEmptyContext());
     }
@@ -52,12 +57,36 @@ public class ContextBeanProducer {
     @Produces
     @Token
     public Optional<String> produceRawToken() {
-        return getAuthorizationHeaderValue();
+        return getCredentials();
     }
     
-    private Optional<String> getAuthorizationHeaderValue() {
-        return Optional.ofNullable(httpRequest.getHeader(HttpHeaders.AUTHORIZATION))
+    private Optional<String> getCredentials() {
+        ConfigurationUtil configUtil = ConfigurationUtil.getInstance();
+        String location = configUtil.get("kee-auth.oidc.credentials.location").orElse(LOCATION_HEADER);
+        
+        if (location.equals(LOCATION_COOKIE)) {
+            String cookieName = configUtil.get("kee-auth.oidc.credentials.cookie-name")
+                .orElse("authorization");
+            return this.getCookieValue(cookieName);
+        }
+        String headerName = configUtil.get("kee-auth.oidc.credentials.header-name")
+            .orElse(HttpHeaders.AUTHORIZATION);
+        return this.getHeaderValue(headerName);
+    }
+    
+    private Optional<String> getHeaderValue(String headerName) {
+        return Optional.ofNullable(httpRequest.getHeader(headerName))
             .map(TokenUtil::trimAuthorizationHeader);
+    }
+    
+    private Optional<String> getCookieValue(String cookieName) {
+        Cookie[] cookies = httpRequest.getCookies();
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equalsIgnoreCase(cookieName)) {
+                return Optional.of(cookie.getValue()).map(TokenUtil::trimAuthorizationHeader);
+            }
+        }
+        return Optional.empty();
     }
     
 }
