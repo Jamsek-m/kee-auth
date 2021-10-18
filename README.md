@@ -45,13 +45,13 @@ You can also manage retrieving jwks from `jwks_url`, by completely disabling fet
 ```yaml
 kee-auth:
   oidc:
-    use-jwks: false
+    use-jwks-uri: false
 ```
 or by providing own `jwks_url` (endpoint from `well-known` config is then ignored):
 ```yaml
 kee-auth:
   oidc:
-    use-jwks: true
+    use-jwks-uri: true
     jwks-url: https://keycloak.example.com/auth/realms/test-realm/protocol/openid-connect/certs
 ```
 
@@ -220,7 +220,7 @@ If for some reason, context cannot be constructed (i.e. expired jwt), it will re
 If you do not need auth context, you can also parse json web token to claims map:
 ```java
 String jwt = "..."; // JWT from request
-Jws<Claims> tokenClaims = KeeAuth.parseJsonWebToken(jwt)
+Map<String, Object> tokenClaims = KeeAuth.parseJsonWebToken(jwt)
 ```
 
 ## Client credentials flow
