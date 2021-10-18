@@ -75,23 +75,18 @@ public class ServiceCallClient {
     
     private static TokenCache retrieveToken() throws HttpCallException {
         TokenResponse tokens = IdentityProviderApi.getTokens();
-        return new TokenCache(tokens.getAccessToken(), tokens.getRefreshToken());
+        return new TokenCache(tokens.getAccessToken());
     }
     
     private static class TokenCache {
         private final String accessToken;
-        private final String refreshToken;
         private final SignedJWT parsedAccessToken;
-        private final SignedJWT parsedRefreshToken;
         
-        public TokenCache(String accessToken, String refreshToken) {
+        public TokenCache(String accessToken) {
             this.accessToken = accessToken;
-            this.refreshToken = refreshToken;
             try {
                 JwtParser jwtParser = new JwtParser(this.accessToken);
                 this.parsedAccessToken = jwtParser.parse();
-                jwtParser = new JwtParser(this.refreshToken);
-                this.parsedRefreshToken = jwtParser.parse();
             } catch (ParseException e) {
                 throw new RuntimeException(e);
             }
@@ -99,14 +94,6 @@ public class ServiceCallClient {
         
         public String getAccessToken() {
             return accessToken;
-        }
-        
-        public String getRefreshToken() {
-            return refreshToken;
-        }
-        
-        public boolean refreshTokenExpired() {
-            return tokenExpired(parsedRefreshToken);
         }
     
         public boolean accessTokenExpired() {
