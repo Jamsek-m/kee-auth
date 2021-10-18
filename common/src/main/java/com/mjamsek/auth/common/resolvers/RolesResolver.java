@@ -23,16 +23,17 @@ package com.mjamsek.auth.common.resolvers;
 import com.kumuluz.ee.configuration.utils.ConfigurationUtil;
 import com.mjamsek.auth.common.annotations.RolesAllowed;
 import com.mjamsek.auth.common.exceptions.UnresolvableRolesException;
-import io.jsonwebtoken.Claims;
 
 import javax.annotation.Priority;
+import java.util.Map;
 import java.util.Set;
 
-import static com.mjamsek.auth.common.config.ConfigKeys.RESOLVER_ENABLED_POSTFIX;
-import static com.mjamsek.auth.common.config.ConfigKeys.RESOLVER_ENABLED_PREFIX;
+import static com.mjamsek.auth.common.config.ConfigKeys.RoleResolvers.RESOLVER_ENABLED_POSTFIX;
+import static com.mjamsek.auth.common.config.ConfigKeys.RoleResolvers.RESOLVER_ENABLED_PREFIX;
 
 /**
  * Interface for resolving roles
+ *
  * @author Miha Jamsek
  * @since 2.0.0
  */
@@ -43,8 +44,9 @@ public interface RolesResolver {
     /**
      * Determines priority of resolver if more than one are present, where higher the value, higher the priority.
      * Default method first checks for presence of {@link Priority} annotation and otherwise defaults to {@link RolesResolver#DEFAULT_PRIORITY}.
-     * @see RolesResolver
+     *
      * @return priority
+     * @see RolesResolver
      */
     default int getPriority() {
         Priority priority = this.getClass().getAnnotation(Priority.class);
@@ -56,6 +58,7 @@ public interface RolesResolver {
     
     /**
      * Determines whether resolver should be used at all.
+     *
      * @return true if enabled, false otherwise
      */
     default boolean isEnabled() {
@@ -70,6 +73,7 @@ public interface RolesResolver {
     
     /**
      * Return resolver name
+     *
      * @return resolver name
      */
     default String getName() {
@@ -82,11 +86,12 @@ public interface RolesResolver {
     
     /**
      * Custom resolver for retrieving roles from JWT claims
-     * @param claims JWT payload claims
+     *
+     * @param claims     JWT payload claims
      * @param annotation annotation on method, from which optional client id can be retrieved
-     * @throws UnresolvableRolesException  if resolver was unable to resolve roles from given claims
      * @return list of user roles
+     * @throws UnresolvableRolesException if resolver was unable to resolve roles from given claims
      */
-    Set<String> resolveRoles(Claims claims, RolesAllowed annotation) throws UnresolvableRolesException;
+    Set<String> resolveRoles(Map<String, Object> claims, RolesAllowed annotation) throws UnresolvableRolesException;
     
 }

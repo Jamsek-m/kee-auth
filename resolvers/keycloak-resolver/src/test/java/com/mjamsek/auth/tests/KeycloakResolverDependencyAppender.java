@@ -24,7 +24,7 @@ public class KeycloakResolverDependencyAppender implements MavenDependencyAppend
         
         libs.add("com.kumuluz.ee:kumuluzee-jax-rs-jersey:");
         libs.add("com.fasterxml.jackson.core:jackson-databind:" + versionsBundle.getString("jackson-version"));
-        libs.add("io.jsonwebtoken:jjwt-impl:" + versionsBundle.getString("jjwt-version"));
+        libs.add("com.nimbusds:nimbus-jose-jwt:" + versionsBundle.getString("jose-version"));
         
         return libs;
     }

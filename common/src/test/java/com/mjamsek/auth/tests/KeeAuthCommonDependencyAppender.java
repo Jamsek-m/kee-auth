@@ -27,8 +27,6 @@ public class KeeAuthCommonDependencyAppender implements MavenDependencyAppender 
         libs.add("com.kumuluz.ee:kumuluzee-cdi-weld:");
         libs.add("com.kumuluz.ee:kumuluzee-servlet-jetty:");
         libs.add("com.fasterxml.jackson.core:jackson-databind:" + versionsBundle.getString("jackson-version"));
-        libs.add("io.jsonwebtoken:jjwt-jackson:" + versionsBundle.getString("jjwt-version"));
-        libs.add("io.jsonwebtoken:jjwt-impl:" + versionsBundle.getString("jjwt-version"));
         
         return libs;
     }

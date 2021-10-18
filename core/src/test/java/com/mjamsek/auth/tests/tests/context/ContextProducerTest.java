@@ -2,10 +2,11 @@ package com.mjamsek.auth.tests.tests.context;
 
 import com.mjamsek.auth.context.AuthContext;
 import com.mjamsek.auth.producers.ContextProducer;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.impl.DefaultJwtBuilder;
-import io.jsonwebtoken.security.Keys;
+import com.mjamsek.auth.utils.DateUtil;
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -16,8 +17,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -35,9 +37,9 @@ public class ContextProducerTest {
     @Deployment
     public static JavaArchive createDeployment1() {
         return ShrinkWrap.create(JavaArchive.class)
-            .addClass(Jwts.class)
-            .addClass(Keys.class)
-            .addClass(DefaultJwtBuilder.class)
+            .addClass(JWTClaimsSet.class)
+            .addClass(JWSHeader.class)
+            .addClass(SignedJWT.class)
             .addClass(ContextProducer.class)
             .addAsResource("context-config.yml", "config.yml")
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
@@ -46,20 +48,27 @@ public class ContextProducerTest {
     private String jwt;
     
     @Before
-    public void init() {
-        SecretKey secretKey = Keys.hmacShaKeyFor("secretsecretsecretsecretsecretsecretkey".getBytes(StandardCharsets.UTF_8));
+    public void init() throws JOSEException {
+        SecretKey secretKey = new SecretKeySpec("secretsecretsecretsecretsecretsecretkey".getBytes(StandardCharsets.UTF_8), JWSAlgorithm.HS256.getName());
+        JWSSigner signer = new MACSigner(secretKey);
         
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("roles", roles);
-        claims.put("email", TOKEN_EMAIL);
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+            .subject(TOKEN_SUBJECT)
+            .issuer(TOKEN_ISS)
+            .expirationTime(DateUtil.addToDate(new Date(), 300))
+            .claim("roles", roles)
+            .claim("email", TOKEN_EMAIL)
+            .build();
         
-        this.jwt = Jwts.builder()
-            .setSubject(TOKEN_SUBJECT)
-            .setIssuer(TOKEN_ISS)
-            .setHeaderParam("kid", TOKEN_KID)
-            .addClaims(claims)
-            .signWith(secretKey)
-            .compact();
+        JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.HS256)
+            .keyID(TOKEN_KID)
+            .type(JOSEObjectType.JWT)
+            .build();
+        
+        SignedJWT signedJWT = new SignedJWT(header, claimsSet);
+        signedJWT.sign(signer);
+        
+        this.jwt = signedJWT.serialize();
     }
     
     @Test
@@ -80,10 +89,10 @@ public class ContextProducerTest {
         assertTrue(context.isAuthenticated());
         assertEquals(TOKEN_SUBJECT, context.getId());
         assertEquals(TOKEN_EMAIL, context.getEmail());
-        
-        Claims claims = context.getTokenPayload();
-        assertEquals(TOKEN_SUBJECT, claims.getSubject());
-        assertEquals(TOKEN_ISS, claims.getIssuer());
+    
+        Map<String, Object> claims = context.getTokenPayload();
+        assertEquals(TOKEN_SUBJECT, claims.get("sub"));
+        assertEquals(TOKEN_ISS, claims.get("iss"));
         assertEquals(roles, claims.get("roles"));
     }
     

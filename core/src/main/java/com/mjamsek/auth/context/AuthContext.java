@@ -20,9 +20,8 @@
  */
 package com.mjamsek.auth.context;
 
-import io.jsonwebtoken.Claims;
-
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -41,7 +40,7 @@ public class AuthContext {
     
     String rawToken;
     
-    Claims tokenPayload;
+    Map<String, Object> tokenPayload;
     
     Set<String> scope;
     
@@ -69,7 +68,7 @@ public class AuthContext {
         return authenticated;
     }
     
-    public Claims getTokenPayload() {
+    public Map<String, Object> getTokenPayload() {
         return tokenPayload;
     }
     
@@ -100,7 +99,7 @@ public class AuthContext {
             return this;
         }
         
-        public Builder payload(Claims payload) {
+        public Builder payload(Map<String, Object> payload) {
             this.instance.tokenPayload = payload;
             return this;
         }

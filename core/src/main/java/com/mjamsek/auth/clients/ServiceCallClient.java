@@ -22,20 +22,23 @@ package com.mjamsek.auth.clients;
 
 import com.mjamsek.auth.apis.IdentityProviderApi;
 import com.mjamsek.auth.common.exceptions.HttpCallException;
+import com.mjamsek.auth.jwt.JwtParser;
 import com.mjamsek.auth.models.TokenResponse;
-import com.mjamsek.auth.utils.TokenUtil;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
+import com.nimbusds.jwt.SignedJWT;
 
+import java.text.ParseException;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
 /**
  * Client for client credentials flow
+ *
  * @author Miha Jamsek
  * @since 2.0.0
  */
+@SuppressWarnings("unused")
 public class ServiceCallClient {
     
     private static final Logger LOG = Logger.getLogger(ServiceCallClient.class.getName());
@@ -44,12 +47,12 @@ public class ServiceCallClient {
     
     /**
      * Execute client credentials flow call, with provided service access token
+     *
      * @param callFunction function to be executed with credentials
-     * @param <T> return type of a call result
+     * @param <T>          return type of a call result
      * @return returned data from call
      * @throws HttpCallException when exception had occurred during call (that may be exception in executed function or error response from called service.
      */
-    @SuppressWarnings("unused")
     public static <T> T call(Function<String, T> callFunction) throws HttpCallException {
         TokenCache tokenCache = accessTokenCache.get();
         if (tokenCache == null) {
@@ -57,7 +60,7 @@ public class ServiceCallClient {
             tokenCache = retrieveToken();
             accessTokenCache.set(tokenCache);
         }
-        if (tokenCache.isExpired()) {
+        if (tokenCache.accessTokenExpired()) {
             LOG.fine("Stored service token is expired, retrieving new one.");
             tokenCache = retrieveToken();
             accessTokenCache.set(tokenCache);
@@ -72,27 +75,51 @@ public class ServiceCallClient {
     
     private static TokenCache retrieveToken() throws HttpCallException {
         TokenResponse tokens = IdentityProviderApi.getTokens();
-        return new TokenCache(tokens.getAccessToken());
+        return new TokenCache(tokens.getAccessToken(), tokens.getRefreshToken());
     }
     
     private static class TokenCache {
         private final String accessToken;
+        private final String refreshToken;
+        private final SignedJWT parsedAccessToken;
+        private final SignedJWT parsedRefreshToken;
         
-        public TokenCache(String jwt) throws JwtException {
-            this.accessToken = jwt;
+        public TokenCache(String accessToken, String refreshToken) {
+            this.accessToken = accessToken;
+            this.refreshToken = refreshToken;
+            try {
+                JwtParser jwtParser = new JwtParser(this.accessToken);
+                this.parsedAccessToken = jwtParser.parse();
+                jwtParser = new JwtParser(this.refreshToken);
+                this.parsedRefreshToken = jwtParser.parse();
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
         }
         
         public String getAccessToken() {
             return accessToken;
         }
         
-        public boolean isExpired() {
+        public String getRefreshToken() {
+            return refreshToken;
+        }
+        
+        public boolean refreshTokenExpired() {
+            return tokenExpired(parsedRefreshToken);
+        }
+    
+        public boolean accessTokenExpired() {
+            return tokenExpired(parsedAccessToken);
+        }
+        
+        private boolean tokenExpired(SignedJWT signedJWT) {
             try {
-                TokenUtil.parseJwt(this.accessToken);
-                return false;
-            } catch (ExpiredJwtException e) {
-                return true;
-            } catch (Exception e) {
+                Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+                Date now = new Date();
+                return now.after(expirationTime);
+            } catch (ParseException e) {
+                LOG.fine("Malformed token!");
                 return false;
             }
         }

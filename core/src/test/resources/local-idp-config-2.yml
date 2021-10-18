@@ -1,4 +1,5 @@
 kee-auth:
   oidc:
+    auto-configure: true
     well-known-url: http://localhost:44444/well-known-2.json
     jwks-url: http://localhost:44444/jwks.json

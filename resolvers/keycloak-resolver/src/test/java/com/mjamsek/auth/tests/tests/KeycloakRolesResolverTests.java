@@ -3,8 +3,6 @@ package com.mjamsek.auth.tests.tests;
 import com.mjamsek.auth.common.annotations.RolesAllowed;
 import com.mjamsek.auth.common.exceptions.UnresolvableRolesException;
 import com.mjamsek.auth.resolvers.keycloak.KeycloakRolesResolver;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -30,7 +28,6 @@ public class KeycloakRolesResolverTests {
     public static JavaArchive createDeployment() {
         return ShrinkWrap.create(JavaArchive.class)
             .addClass(KeycloakRolesResolver.class)
-            .addClass(Jwts.class)
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
     }
     
@@ -40,24 +37,21 @@ public class KeycloakRolesResolverTests {
     private static final Set<String> client1Roles = Set.of("user");
     private static final Set<String> client2Roles = new HashSet<>();
     
-    private Claims claims;
-    private Claims malformedClaims;
+    private Map<String, Object> claims;
+    private Map<String, Object> malformedClaims;
     
     @Before
     public void init() {
+        this.malformedClaims = new HashMap<>();
+        this.claims = new HashMap<>();
         
-        Map<String, Object> claimsRaw = new HashMap<>();
-        claimsRaw.put("sub", "123");
-        claimsRaw.put("iss", "self");
-        
-        claimsRaw.put(REALM_ACCESS_KEY, createRolesNode(realmRoles));
+        this.claims.put("sub", "123");
+        this.claims.put("iss", "self");
+        this.claims.put(REALM_ACCESS_KEY, createRolesNode(realmRoles));
         Map<String, Object> clientAccesses = new HashMap<>();
         clientAccesses.put(CLIENT_1_NAME, createRolesNode(client1Roles));
         clientAccesses.put(CLIENT_2_NAME, createRolesNode(client2Roles));
-        claimsRaw.put(CLIENT_ACCESS_KEY, clientAccesses);
-        
-        this.claims = Jwts.claims(claimsRaw);
-        this.malformedClaims = Jwts.claims();
+        this.claims.put(CLIENT_ACCESS_KEY, clientAccesses);
     }
     
     private static Map<String, Object> createRolesNode(Set<String> roles) {
@@ -103,7 +97,7 @@ public class KeycloakRolesResolverTests {
         RolesAllowed clientAnnotation = createAnnotation(Set.of(), CLIENT_1_NAME);
         Set<String> returnedRoles = resolver.resolveRoles(this.claims, clientAnnotation);
         assertEquals(client1Roles, returnedRoles);
-    
+        
         clientAnnotation = createAnnotation(Set.of(), CLIENT_2_NAME);
         returnedRoles = resolver.resolveRoles(this.claims, clientAnnotation);
         assertEquals(client2Roles, returnedRoles);

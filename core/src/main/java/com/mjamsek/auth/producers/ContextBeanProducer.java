@@ -22,6 +22,8 @@ package com.mjamsek.auth.producers;
 
 import com.kumuluz.ee.configuration.utils.ConfigurationUtil;
 import com.mjamsek.auth.common.annotations.Token;
+import com.mjamsek.auth.common.config.ConfigDefaults;
+import com.mjamsek.auth.common.config.ConfigKeys;
 import com.mjamsek.auth.context.AuthContext;
 import com.mjamsek.auth.utils.TokenUtil;
 
@@ -30,8 +32,10 @@ import javax.enterprise.inject.Produces;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import java.util.Optional;
+
+import static com.mjamsek.auth.common.config.OIDCConstants.CREDENTIALS_LOCATION_COOKIE;
+import static com.mjamsek.auth.common.config.OIDCConstants.CREDENTIALS_LOCATION_HEADER;
 
 /**
  * @author Miha Jamsek
@@ -39,9 +43,6 @@ import java.util.Optional;
  */
 @RequestScoped
 public class ContextBeanProducer {
-    
-    private static final String LOCATION_HEADER = "header";
-    private static final String LOCATION_COOKIE = "cookie";
     
     @Context
     private HttpServletRequest httpRequest;
@@ -62,15 +63,13 @@ public class ContextBeanProducer {
     
     private Optional<String> getCredentials() {
         ConfigurationUtil configUtil = ConfigurationUtil.getInstance();
-        String location = configUtil.get("kee-auth.oidc.credentials.location").orElse(LOCATION_HEADER);
+        String location = configUtil.get(ConfigKeys.Oidc.Credentials.LOCATION).orElse(CREDENTIALS_LOCATION_HEADER);
         
-        if (location.equals(LOCATION_COOKIE)) {
-            String cookieName = configUtil.get("kee-auth.oidc.credentials.cookie-name")
-                .orElse("authorization");
+        if (location.equals(CREDENTIALS_LOCATION_COOKIE)) {
+            String cookieName = ConfigDefaults.getCredentialsCookieName();
             return this.getCookieValue(cookieName);
         }
-        String headerName = configUtil.get("kee-auth.oidc.credentials.header-name")
-            .orElse(HttpHeaders.AUTHORIZATION);
+        String headerName = ConfigDefaults.getCredentialsHeaderName();
         return this.getHeaderValue(headerName);
     }
     

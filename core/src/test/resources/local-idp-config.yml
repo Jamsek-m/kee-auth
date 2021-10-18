@@ -4,4 +4,5 @@ kumuluzee:
       port: 44444
 kee-auth:
   oidc:
+    auto-configure: true
     well-known-url: http://localhost:44444/well-known.json

@@ -21,13 +21,14 @@
 package com.mjamsek.auth.apis;
 
 import com.kumuluz.ee.configuration.utils.ConfigurationUtil;
+import com.mjamsek.auth.common.config.ConfigDefaults;
 import com.mjamsek.auth.common.config.ConfigKeys;
 import com.mjamsek.auth.common.exceptions.HttpCallException;
 import com.mjamsek.auth.common.exceptions.MissingConfigException;
 import com.mjamsek.auth.config.KeeAuthConfig;
-import com.mjamsek.auth.models.JsonWebKeySet;
 import com.mjamsek.auth.models.TokenResponse;
 import com.mjamsek.auth.models.WellKnownConfig;
+import com.nimbusds.jose.jwk.JWKSet;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -36,8 +37,12 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.Base64;
+import java.util.Optional;
 import java.util.logging.Logger;
+
+import static com.mjamsek.auth.common.config.OIDCConstants.*;
 
 /**
  * @author Miha Jamsek
@@ -47,23 +52,10 @@ public class IdentityProviderApi {
     
     private static final Logger LOG = Logger.getLogger(IdentityProviderApi.class.getName());
     
-    private static final String GRANT_TYPE_KEY = "grant_type";
-    private static final String GRANT_TYPE_CLIENT_CREDENTIALS_VALUE = "client_credentials";
-    private static final String AUTHORIZATION_BASIC_PREFIX = "Basic";
-    
     public static TokenResponse getTokens() throws MissingConfigException, HttpCallException {
-        ConfigurationUtil configUtil = ConfigurationUtil.getInstance();
-        
-        String tokenEndpoint = configUtil.get(ConfigKeys.TOKEN_URL)
-            .or(KeeAuthConfig::getTokenEndpoint)
-            .orElseThrow(() -> new MissingConfigException(ConfigKeys.TOKEN_URL));
-        String clientId = configUtil.get(ConfigKeys.CLIENT_CREDENTIALS_ID)
-            .orElseThrow(() -> new MissingConfigException(ConfigKeys.CLIENT_CREDENTIALS_ID));
-        String clientSecret = configUtil.get(ConfigKeys.CLIENT_CREDENTIALS_SECRET)
-            .orElseThrow(() -> new MissingConfigException(ConfigKeys.CLIENT_CREDENTIALS_SECRET));
-        
-        Form formData = new Form(GRANT_TYPE_KEY, GRANT_TYPE_CLIENT_CREDENTIALS_VALUE);
-        String encodedCredentials = new String(Base64.getEncoder().encode((clientId + ":" + clientSecret).getBytes(StandardCharsets.UTF_8)));
+        String tokenEndpoint = getTokenEndpoint();
+        Form formData = new Form(GRANT_TYPE_PARAM, GRANT_TYPE_CLIENT_CREDENTIALS_VALUE);
+        String encodedCredentials = getEncodedCredentials();
         
         Response response = ClientBuilder.newClient()
             .target(tokenEndpoint)
@@ -80,11 +72,23 @@ public class IdentityProviderApi {
         }
     }
     
+    private static String getEncodedCredentials() throws MissingConfigException {
+        ConfigurationUtil configUtil = ConfigurationUtil.getInstance();
+        
+        String clientId = configUtil.get(ConfigKeys.Oidc.ClientCredentials.CLIENT_ID)
+            .orElseThrow(() -> new MissingConfigException(ConfigKeys.Oidc.ClientCredentials.CLIENT_ID));
+        String clientSecret = configUtil.get(ConfigKeys.Oidc.ClientCredentials.CLIENT_SECRET)
+            .orElseThrow(() -> new MissingConfigException(ConfigKeys.Oidc.ClientCredentials.CLIENT_SECRET));
+        
+        return new String(Base64.getEncoder().encode(
+            (clientId + ":" + clientSecret).getBytes(StandardCharsets.UTF_8)));
+    }
+    
     public static WellKnownConfig getWellKnownConfig() throws MissingConfigException, HttpCallException {
         ConfigurationUtil configUtil = ConfigurationUtil.getInstance();
         
-        String wellKnownEndpoint = configUtil.get(ConfigKeys.WELL_KNOWN_URL)
-            .orElseThrow(() -> new MissingConfigException(ConfigKeys.WELL_KNOWN_URL));
+        String wellKnownEndpoint = configUtil.get(ConfigKeys.Oidc.WELL_KNOWN_URL)
+            .orElseThrow(() -> new MissingConfigException(ConfigKeys.Oidc.WELL_KNOWN_URL));
         
         Response response = ClientBuilder.newClient()
             .target(wellKnownEndpoint)
@@ -100,12 +104,12 @@ public class IdentityProviderApi {
         }
     }
     
-    public static JsonWebKeySet getJsonWebKeySet() throws MissingConfigException, HttpCallException {
+    public static JWKSet getJWKS() throws MissingConfigException, HttpCallException, ParseException {
         ConfigurationUtil configUtil = ConfigurationUtil.getInstance();
         
-        String jwksEndpoint = configUtil.get(ConfigKeys.JWKS_URL)
+        String jwksEndpoint = configUtil.get(ConfigKeys.Oidc.JWKS_URL)
             .or(KeeAuthConfig::getJwksEndpoint)
-            .orElseThrow(() -> new MissingConfigException(ConfigKeys.JWKS_URL));
+            .orElseThrow(() -> new MissingConfigException(ConfigKeys.Oidc.JWKS_URL));
         
         Response response = ClientBuilder.newClient()
             .target(jwksEndpoint)
@@ -117,8 +121,20 @@ public class IdentityProviderApi {
             LOG.severe("Error fetching JWKS! Received response: " + errorResponse);
             throw new HttpCallException("Unable to retrieve JWKS!");
         } else {
-            return response.readEntity(JsonWebKeySet.class);
+            String responsePayload = response.readEntity(String.class);
+            return JWKSet.parse(responsePayload);
         }
+    }
+    
+    private static String getTokenEndpoint() {
+        return ConfigurationUtil.getInstance()
+            .get(ConfigKeys.Oidc.ClientCredentials.TOKEN_URL)
+            .or(() -> {
+                if (!ConfigDefaults.autoconfigurationEnabled()) {
+                    return Optional.empty();
+                }
+                return KeeAuthConfig.getTokenEndpoint();
+            }).orElseThrow(() -> new MissingConfigException(ConfigKeys.Oidc.ClientCredentials.TOKEN_URL));
     }
     
 }

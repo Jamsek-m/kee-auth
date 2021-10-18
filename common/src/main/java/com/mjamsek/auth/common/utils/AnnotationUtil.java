@@ -34,6 +34,10 @@ import java.lang.reflect.Method;
  */
 public class AnnotationUtil {
     
+    private AnnotationUtil() {
+    
+    }
+    
     public static AnnotationResult<RolesAllowed> getRolesAllowedAnnotation(Method method) {
         RolesAllowed rolesAllowedAnnotation = method.getDeclaredAnnotation(RolesAllowed.class);
         if (rolesAllowedAnnotation == null) {

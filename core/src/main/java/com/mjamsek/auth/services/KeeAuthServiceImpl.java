@@ -29,7 +29,6 @@ import com.mjamsek.auth.common.models.AnnotationResult;
 import com.mjamsek.auth.common.resolvers.RolesResolver;
 import com.mjamsek.auth.common.utils.AnnotationUtil;
 import com.mjamsek.auth.context.AuthContext;
-import io.jsonwebtoken.Claims;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -131,7 +130,7 @@ public class KeeAuthServiceImpl implements KeeAuthService {
      * @return set of granted roles
      */
     private Set<String> getUserRoles(RolesAllowed annotation) {
-        Claims payload = authContext.getTokenPayload();
+        Map<String, Object> payload = authContext.getTokenPayload();
         Set<String> userRoles = null;
         
         List<RolesResolver> rolesResolvers = getRoleResolvers();

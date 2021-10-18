@@ -5,8 +5,9 @@ kee-auth:
   oidc:
     # if true, endpoints and jwks will be automatically fetched from .well-known url
     auto-configure: true
+    issuer: https://keycloak.example.com/auth
     well-known-url: https://keycloak.example.com/auth/realms/kee-auth-test/.well-known/openid-configuration
-    use-jwks: true
+    use-jwks-uri: true
     jwks-url: https://keycloak.example.com/auth/realms/kee-auth-test/protocol/openid-connect/certs
     # used for client credentials flow
     client-credentials:

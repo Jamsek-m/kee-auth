@@ -1,5 +1,7 @@
 kee-auth:
-  autoconfigure: false
+  oidc:
+    auto-configure: false
+    issuer: https://localhost:8090/auth
   jwt:
     keys:
       - kid: ac451sd4

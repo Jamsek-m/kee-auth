@@ -25,7 +25,6 @@ import com.mjamsek.auth.common.exceptions.UnresolvableRolesException;
 import com.mjamsek.auth.common.mappings.ClientNameMapper;
 import com.mjamsek.auth.common.resolvers.ResolverDef;
 import com.mjamsek.auth.common.resolvers.RolesResolver;
-import io.jsonwebtoken.Claims;
 
 import java.util.HashSet;
 import java.util.List;
@@ -53,7 +52,7 @@ public class KeycloakRolesResolver implements RolesResolver {
     
     @Override
     @SuppressWarnings("unchecked")
-    public Set<String> resolveRoles(Claims claims, RolesAllowed annotation) throws UnresolvableRolesException {
+    public Set<String> resolveRoles(Map<String, Object> claims, RolesAllowed annotation) throws UnresolvableRolesException {
         String clientName = annotation.clientName();
         if (clientName.isEmpty() || clientName.isBlank()) {
             // Retrieve access node for realm access

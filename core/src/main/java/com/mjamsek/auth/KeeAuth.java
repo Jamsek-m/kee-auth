@@ -25,10 +25,9 @@ import com.mjamsek.auth.common.exceptions.MissingConfigException;
 import com.mjamsek.auth.config.KeeAuthInitializator;
 import com.mjamsek.auth.context.AuthContext;
 import com.mjamsek.auth.producers.ContextProducer;
-import com.mjamsek.auth.utils.TokenUtil;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
+
+import javax.ws.rs.NotAuthorizedException;
+import java.util.Map;
 
 /**
  * @author Miha Jamsek
@@ -53,10 +52,14 @@ public class KeeAuth {
      * Parses jwt to claims map
      * @param jwt json web token
      * @return parsed claims stored in a map
-     * @throws JwtException if jwt is not valid (i.e. expired)
+     * @throws NotAuthorizedException if jwt is not valid (i.e. expired)
      */
-    public static Jws<Claims> parseJsonWebToken(String jwt) throws JwtException {
-        return TokenUtil.parseJwt(jwt);
+    public static Map<String, Object> parseJsonWebToken(String jwt) throws NotAuthorizedException {
+        AuthContext authContext = ContextProducer.produceContext(jwt);
+        if (authContext.isAuthenticated()) {
+            return authContext.getTokenPayload();
+        }
+        throw new NotAuthorizedException("Invalid JWT!");
     }
     
     /**

@@ -1,147 +1,190 @@
-/*
- *  Copyright (c) 2019-2021 Miha Jamsek and/or its affiliates
- *  and other contributors as indicated by the @author tags and
- *  the contributor list.
- *
- *  Licensed under the MIT License (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *  https://opensource.org/licenses/MIT
- *
- *  The software is provided "AS IS", WITHOUT WARRANTY OF ANY KIND, express or
- *  implied, including but not limited to the warranties of merchantability,
- *  fitness for a particular purpose and noninfringement. in no event shall the
- *  authors or copyright holders be liable for any claim, damages or other
- *  liability, whether in an action of contract, tort or otherwise, arising from,
- *  out of or in connection with the software or the use or other dealings in the
- *  software. See the License for the specific language governing permissions and
- *  limitations under the License.
- */
 package com.mjamsek.auth.keys;
 
 import com.kumuluz.ee.configuration.utils.ConfigurationUtil;
+import com.mjamsek.auth.apis.IdentityProviderApi;
+import com.mjamsek.auth.common.config.ConfigDefaults;
 import com.mjamsek.auth.common.config.ConfigKeys;
-import com.mjamsek.auth.common.enums.VerificationAlgorithm;
-import com.mjamsek.auth.models.JsonWebKey;
-import com.mjamsek.auth.models.keys.HmacJwtKey;
-import com.mjamsek.auth.models.keys.JwtSigningKey;
-import com.mjamsek.auth.models.keys.RsaJwtKey;
-import io.jsonwebtoken.security.WeakKeyException;
+import com.mjamsek.auth.common.exceptions.HttpCallException;
+import com.mjamsek.auth.common.exceptions.MissingConfigException;
+import com.mjamsek.auth.config.KeeAuthConfig;
+import com.mjamsek.auth.mappers.JsonWebKeyMapper;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.JWKSet;
 
 import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
+import java.text.ParseException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
-/**
- * @author Miha Jamsek
- * @since 2.0.0
- */
 public class KeyLoader {
+    
+    private static KeyLoader INSTANCE = null;
+    
+    public static KeyLoader getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new KeyLoader();
+        }
+        return INSTANCE;
+    }
+    
+    private KeyLoader() {
+    
+    }
     
     private static final Logger LOG = Logger.getLogger(KeyLoader.class.getName());
     
-    private static final Set<VerificationAlgorithm> RSA_SET = Set.of(VerificationAlgorithm.RS256, VerificationAlgorithm.RS384, VerificationAlgorithm.RS512);
-    private static final Set<VerificationAlgorithm> HMAC_SET = Set.of(VerificationAlgorithm.HS256, VerificationAlgorithm.HS384, VerificationAlgorithm.HS512);
-    private static final Set<VerificationAlgorithm> EC_SET = Set.of(VerificationAlgorithm.ES256, VerificationAlgorithm.ES384, VerificationAlgorithm.ES512);
-    
-    public static List<JwtSigningKey> loadKeys(List<JsonWebKey> keys) {
-        List<JwtSigningKey> signingKeys = new ArrayList<>();
-        for (JsonWebKey jsonWebKey : keys) {
-            try {
-                if (jsonWebKey.getKid() == null || jsonWebKey.getKid().isBlank()) {
-                    throw new InvalidKeySpecException("Missing kid (key id)!");
-                }
-                if (jsonWebKey.getAlg() == null || jsonWebKey.getAlg().isBlank()) {
-                    throw new InvalidKeySpecException("Missing alg (signing algorithm)!");
-                }
-                
-                // Parse algorithm string to known algorithm
-                VerificationAlgorithm algorithm = VerificationAlgorithm.valueOf(jsonWebKey.getAlg());
-                
-                // Handle RSA public keys
-                if (algorithm.isPartOfSet(RSA_SET)) {
-                    RsaJwtKey rsaKey;
-                    if (jsonWebKey.getX5c() != null && jsonWebKey.getX5c().size() > 0) {
-                        String x5c = jsonWebKey.getX5c().get(0);
-                        rsaKey = new RsaJwtKey(jsonWebKey.getKid(), x5c);
-                    } else {
-                        rsaKey = new RsaJwtKey(jsonWebKey.getKid(), jsonWebKey.getN(), jsonWebKey.getE());
-                    }
-                    signingKeys.add(rsaKey);
-                } else if (algorithm.isPartOfSet(HMAC_SET)) {
-                    HmacJwtKey hmacKey = new HmacJwtKey(jsonWebKey.getKid(), algorithm, jsonWebKey.getSecret());
-                    signingKeys.add(hmacKey);
-                } else {
-                    // EC is not yet supported, skip its creation.
-                    String unknownAlgorithm = jsonWebKey.getAlg();
-                    String unknownKid = jsonWebKey.getKid();
-                    LOG.warning("Unsupported algorithm: " + unknownAlgorithm +
-                        "! Cannot create key with id: " + unknownKid + ", skipping...");
-                }
-            } catch (IllegalArgumentException e) {
-                LOG.warning("Unknown algorithm '" + jsonWebKey.getAlg() + "'! Skipping this key...");
-            } catch (WeakKeyException e) {
-                LOG.warning(e.getMessage());
-                LOG.warning("Skipping this key...");
-            } catch (InvalidKeySpecException e) {
-                LOG.warning("Invalid key spec '" + jsonWebKey.getKid() + "'! " + e.getMessage() + " Skipping this key...");
-                e.printStackTrace();
+    public Optional<KeyEntry> loadKey(String kid) {
+        final Map<String, KeyEntry> localKeys = getKeysFromConfiguration();
+        if (localKeys.containsKey(kid)) {
+            return Optional.of(localKeys.get(kid));
+        }
+        
+        if (ConfigDefaults.useJwks()) {
+            Map<String, KeyEntry> remoteKeys = KeeAuthConfig.getVerificationKeys();
+            if (remoteKeys.containsKey(kid)) {
+                return Optional.of(remoteKeys.get(kid));
+            }
+            
+            // If key is not present, try to refetch JWKS
+            remoteKeys = fetchKeysFromJwks();
+            if (remoteKeys.containsKey(kid)) {
+                return Optional.of(remoteKeys.get(kid));
             }
         }
-        return signingKeys;
+        
+        return Optional.empty();
     }
     
-    public static List<JsonWebKey> readKeysFromConfiguration() {
-        List<JsonWebKey> jsonWebKeys = new ArrayList<>();
+    public Map<String, KeyEntry> fetchKeysFromJwks() {
+        try {
+            LOG.fine("Fetching public keys from JWKS endpoint ...");
+            JWKSet jwkSet = IdentityProviderApi.getJWKS();
+            List<KeyEntry> keyEntries = jwkSet.getKeys()
+                .stream()
+                .map(JsonWebKeyMapper::toKeyEntry)
+                .collect(Collectors.toUnmodifiableList());
+            LOG.fine("Fetched public keys!");
+            return keyEntries.stream()
+                .peek(KeeAuthConfig::addVerificationKey) // Stores keys into config
+                .collect(Collectors.toMap(KeyEntry::getKid, k -> k));
+        } catch (HttpCallException e) {
+            LOG.severe(e.getMessage());
+            LOG.severe("Unable to fetch keys from jwks endpoint! Falling back to using locally provided keys.");
+            return null;
+        } catch (ParseException e) {
+            LOG.severe(e.getMessage());
+            LOG.severe("Unable to parse response payload! Received JWKS is unreadable! Falling back to using locally provided keys.");
+            return null;
+        } catch (MissingConfigException e) {
+            LOG.warning(e.getMessage());
+            LOG.warning("Falling back to using only locally provided keys.");
+            return null;
+        }
+    }
+    
+    private Map<String, KeyEntry> getKeysFromConfiguration() {
+        Map<String, KeyEntry> keyMap = new HashMap<>();
+        int listSize = ConfigurationUtil.getInstance().getListSize(ConfigKeys.Jwt.KEYS).orElse(0);
+        for (int i = 0; i < listSize; i++) {
+            try {
+                KeyEntry key = readKeyFromConfiguration(ConfigKeys.Jwt.KEYS + "[" + i + "].");
+                keyMap.put(key.getKid(), key);
+            } catch (InvalidKeySpecException e) {
+                LOG.warning(e.getMessage());
+                LOG.warning("Malformed key configuration! Key will be ignored!");
+            }
+        }
+        return keyMap;
+    }
+    
+    private KeyEntry readKeyFromConfiguration(String configPrefix) throws InvalidKeySpecException {
         ConfigurationUtil configUtil = ConfigurationUtil.getInstance();
         
-        int listSize = configUtil.getListSize(ConfigKeys.JWT_KEYS).orElse(0);
-        for (int i = 0; i < listSize; i++) {
-            Optional<String> kid = configUtil.get(ConfigKeys.JWT_KEYS + "[" + i + "]." + ConfigKeys.KEY_KID_POSTFIX);
-            Optional<String> alg = configUtil.get(ConfigKeys.JWT_KEYS + "[" + i + "]." + ConfigKeys.KEY_ALG_POSTFIX);
-            
-            if (kid.isPresent() && alg.isPresent()) {
-                JsonWebKey jsonWebKey = new JsonWebKey();
-                jsonWebKey.setKid(kid.get());
-                jsonWebKey.setAlg(alg.get());
-                
-                Optional<String> n = configUtil.get(ConfigKeys.JWT_KEYS + "[" + i + "]." + ConfigKeys.KEY_N_POSTFIX);
-                Optional<String> e = configUtil.get(ConfigKeys.JWT_KEYS + "[" + i + "]." + ConfigKeys.KEY_E_POSTFIX);
-                Optional<String> secret = configUtil.get(ConfigKeys.JWT_KEYS + "[" + i + "]." + ConfigKeys.KEY_SECRET_POSTFIX);
-                Optional<String> crv = configUtil.get(ConfigKeys.JWT_KEYS + "[" + i + "]." + ConfigKeys.KEY_CRV_POSTFIX);
-                Optional<String> x = configUtil.get(ConfigKeys.JWT_KEYS + "[" + i + "]." + ConfigKeys.KEY_X_POSTFIX);
-                Optional<String> y = configUtil.get(ConfigKeys.JWT_KEYS + "[" + i + "]." + ConfigKeys.KEY_Y_POSTFIX);
-                Optional<String> x5c = configUtil.get(ConfigKeys.JWT_KEYS + "[" + i + "]." + ConfigKeys.KEY_X5C_POSTFIX);
-                
-                boolean hasKey = false;
-                if (x5c.isPresent()) {
-                    jsonWebKey.setX5c(List.of(x5c.get()));
-                    hasKey = true;
-                } else if (n.isPresent() && e.isPresent()) {
-                    jsonWebKey.setN(n.get());
-                    jsonWebKey.setE(e.get());
-                    hasKey = true;
-                } else if (secret.isPresent()) {
-                    jsonWebKey.setSecret(secret.get());
-                    hasKey = true;
-                } else if (x.isPresent() && y.isPresent() && crv.isPresent()) {
-                    jsonWebKey.setX(x.get());
-                    jsonWebKey.setY(y.get());
-                    jsonWebKey.setCrv(crv.get());
-                    hasKey = true;
-                }
-                
-                if (hasKey) {
-                    jsonWebKeys.add(jsonWebKey);
-                }
-            }
+        String kid = configUtil.get(configPrefix + ConfigKeys.Jwt.Keys.KID_POSTFIX)
+            .orElseThrow(() -> new InvalidKeySpecException(""));
+        String alg = configUtil.get(configPrefix + ConfigKeys.Jwt.Keys.ALG_POSTFIX)
+            .orElseThrow(() -> new InvalidKeySpecException(""));
+        
+        JWSAlgorithm algorithm = JWSAlgorithm.parse(alg);
+        if (algorithm == null) {
+            throw new InvalidKeySpecException("");
         }
         
-        return jsonWebKeys;
+        if (JWSAlgorithm.Family.RSA.contains(algorithm)) {
+            return createRSASigningKey(kid, algorithm, configPrefix);
+        } else if (JWSAlgorithm.Family.EC.contains(algorithm)) {
+            return createECSigningKey(kid, algorithm, configPrefix);
+        } else if (JWSAlgorithm.Family.HMAC_SHA.contains(algorithm)) {
+            return createHmacSigningKey(kid, algorithm, configPrefix);
+        } else {
+            throw new RuntimeException("");
+        }
     }
     
+    private KeyEntry createHmacSigningKey(String kid, JWSAlgorithm algorithm, String configPrefix) throws InvalidKeySpecException {
+        Optional<String> secret = ConfigurationUtil.getInstance().get(configPrefix + ConfigKeys.Jwt.Keys.SECRET_POSTFIX);
+        if (secret.isPresent()) {
+            return KeyBuilder.newBuilder(kid)
+                .withHmacAlgorithm(algorithm)
+                .withSecret(secret.get())
+                .build();
+        } else {
+            throw new InvalidKeySpecException("Missing required parameters for ");
+        }
+    }
+    
+    private KeyEntry createRSASigningKey(String kid, JWSAlgorithm algorithm, String configPrefix) throws InvalidKeySpecException {
+        ConfigurationUtil configUtil = ConfigurationUtil.getInstance();
+        
+        Optional<String> n = configUtil.get(configPrefix + ConfigKeys.Jwt.Keys.N_POSTFIX);
+        Optional<String> e = configUtil.get(configPrefix + ConfigKeys.Jwt.Keys.E_POSTFIX);
+        Optional<String> x5c = configUtil.get(configPrefix + ConfigKeys.Jwt.Keys.X5C_POSTFIX);
+        Optional<String> publicKey = configUtil.get(configPrefix + ConfigKeys.Jwt.Keys.PUB_KEY_POSTFIX);
+        
+        if (n.isPresent() && e.isPresent()) {
+            return KeyBuilder.newBuilder(kid)
+                .withRsaAlgorithm(algorithm)
+                .withModulusAndExponent(n.get(), e.get())
+                .build();
+        } else if (publicKey.isPresent()) {
+            return KeyBuilder.newBuilder(kid)
+                .withRsaAlgorithm(algorithm)
+                .withPublicKey(publicKey.get())
+                .build();
+        } else if (x5c.isPresent()) {
+            return KeyBuilder.newBuilder(kid)
+                .withRsaAlgorithm(algorithm)
+                .withX509Certificate(x5c.get())
+                .build();
+        } else {
+            throw new InvalidKeySpecException("Missing required parameters for ");
+        }
+    }
+    
+    private KeyEntry createECSigningKey(String kid, JWSAlgorithm algorithm, String configPrefix) throws InvalidKeySpecException {
+        ConfigurationUtil configUtil = ConfigurationUtil.getInstance();
+        
+        Optional<String> x = configUtil.get(configPrefix + ConfigKeys.Jwt.Keys.X_POSTFIX);
+        Optional<String> y = configUtil.get(configPrefix + ConfigKeys.Jwt.Keys.Y_POSTFIX);
+        Optional<String> crv = configUtil.get(configPrefix + ConfigKeys.Jwt.Keys.CRV_POSTFIX);
+        Optional<String> publicKey = configUtil.get(configPrefix + ConfigKeys.Jwt.Keys.PUB_KEY_POSTFIX);
+        
+        if (x.isPresent() && y.isPresent() && crv.isPresent()) {
+            return KeyBuilder.newBuilder(kid)
+                .withECAlgorithm(algorithm)
+                .withCurveParameters(crv.get(), x.get(), y.get())
+                .build();
+        } else if (publicKey.isPresent()) {
+            return KeyBuilder.newBuilder(kid)
+                .withECAlgorithm(algorithm)
+                .withPublicKey(publicKey.get())
+                .build();
+        } else {
+            throw new InvalidKeySpecException("Missing required parameters for ");
+        }
+    }
 }

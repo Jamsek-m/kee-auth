@@ -22,13 +22,13 @@ package com.mjamsek.auth.resolvers;
 
 import com.kumuluz.ee.configuration.utils.ConfigurationUtil;
 import com.mjamsek.auth.common.annotations.RolesAllowed;
+import com.mjamsek.auth.common.config.ConfigKeys;
 import com.mjamsek.auth.common.exceptions.UnresolvableRolesException;
 import com.mjamsek.auth.common.resolvers.ResolverDef;
 import com.mjamsek.auth.common.resolvers.RolesResolver;
-import com.mjamsek.auth.common.config.ConfigKeys;
-import io.jsonwebtoken.Claims;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -49,7 +49,7 @@ public class DefaultRolesResolver implements RolesResolver {
     
     @Override
     @SuppressWarnings("unchecked")
-    public Set<String> resolveRoles(Claims claims, RolesAllowed annotation) throws UnresolvableRolesException {
+    public Set<String> resolveRoles(Map<String, Object> claims, RolesAllowed annotation) throws UnresolvableRolesException {
         Object rolesObject = claims.get(getRoleClaimName());
         if (rolesObject instanceof List) {
             List<Object> roleItemsList = (List<Object>) rolesObject;
@@ -62,7 +62,7 @@ public class DefaultRolesResolver implements RolesResolver {
     }
     
     private String getRoleClaimName() {
-        return ConfigurationUtil.getInstance().get(ConfigKeys.CLAIM_MAPPING_ROLES).orElse("roles");
+        return ConfigurationUtil.getInstance().get(ConfigKeys.RoleResolvers.DEFAULT_ROLES_MAPPING).orElse("roles");
     }
     
 }

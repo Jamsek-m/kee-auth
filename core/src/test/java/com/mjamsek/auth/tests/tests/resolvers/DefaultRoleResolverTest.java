@@ -3,8 +3,6 @@ package com.mjamsek.auth.tests.tests.resolvers;
 import com.mjamsek.auth.common.annotations.RolesAllowed;
 import com.mjamsek.auth.common.exceptions.UnresolvableRolesException;
 import com.mjamsek.auth.resolvers.DefaultRolesResolver;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -29,23 +27,21 @@ public class DefaultRoleResolverTest {
     public static JavaArchive createDeployment() {
         return ShrinkWrap.create(JavaArchive.class)
             .addClass(DefaultRolesResolver.class)
-            .addClass(Jwts.class)
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
     }
     
     private static final Set<String> roles = Set.of("user", "dev");
     
-    private Claims claims;
-    private Claims malformedClaims;
+    private Map<String, Object> claims;
+    private Map<String, Object> malformedClaims;
     
     @Before
     public void init() {
-        Map<String, Object> claimsRaw = new HashMap<>();
-        claimsRaw.put("sub", "123");
-        claimsRaw.put("iss", "self");
-        claimsRaw.put("roles", new ArrayList<>(roles));
-        this.claims = Jwts.claims(claimsRaw);
-        this.malformedClaims = Jwts.claims();
+        this.claims = new HashMap<>();
+        this.claims.put("sub", "123");
+        this.claims.put("iss", "self");
+        this.claims.put("roles", new ArrayList<>(roles));
+        this.malformedClaims = new HashMap<>();
     }
     
     private static RolesAllowed createAnnotation(Set<String> requiredRoles, String clientName) {
@@ -75,7 +71,7 @@ public class DefaultRoleResolverTest {
         RolesAllowed globalAnnotation = createAnnotation(Set.of(), "");
         Set<String> returnedRoles = resolver.resolveRoles(this.claims, globalAnnotation);
         assertEquals(roles, returnedRoles);
-    
+        
         RolesAllowed ignoredClientAnnotation = createAnnotation(Set.of(), "client-name");
         Set<String> returnedIgnoredRoles = resolver.resolveRoles(this.claims, ignoredClientAnnotation);
         assertEquals(roles, returnedIgnoredRoles);

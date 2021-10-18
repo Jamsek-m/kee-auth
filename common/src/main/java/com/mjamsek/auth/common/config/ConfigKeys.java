@@ -26,40 +26,58 @@ package com.mjamsek.auth.common.config;
  */
 public class ConfigKeys {
     
-    // Clients
     public static final String CLIENTS = "kee-auth.clients";
     
-    // OIDC
-    public static final String AUTO_CONFIGURE = "kee-auth.oidc.auto-configure";
-    public static final String WELL_KNOWN_URL = "kee-auth.oidc.well-known-url";
-    public static final String USE_JWKS = "kee-auth.oidc.use-jwks";
-    public static final String JWKS_URL = "kee-auth.oidc.jwks-url";
-    public static final String CLIENT_CREDENTIALS_ID = "kee-auth.oidc.client-credentials.client-id";
-    public static final String CLIENT_CREDENTIALS_SECRET = "kee-auth.oidc.client-credentials.client-secret";
-    public static final String TOKEN_URL = "kee-auth.oidc.client-credentials.token-url";
+    public static class Oidc {
+        public static final String ISSUER = "kee-auth.oidc.issuer";
+        public static final String AUTO_CONFIGURE = "kee-auth.oidc.auto-configure";
+        public static final String WELL_KNOWN_URL = "kee-auth.oidc.well-known-url";
+        public static final String USE_JWKS_URI = "kee-auth.oidc.use-jwks-uri";
+        public static final String JWKS_URL = "kee-auth.oidc.jwks-url";
+        
+        public static class ClientCredentials {
+            public static final String CLIENT_ID = "kee-auth.oidc.client-credentials.client-id";
+            public static final String CLIENT_SECRET = "kee-auth.oidc.client-credentials.client-secret";
+            public static final String TOKEN_URL = "kee-auth.oidc.client-credentials.token-url";
+        }
+        
+        public static class Credentials {
+            public static final String LOCATION = "kee-auth.oidc.credentials.location";
+            public static final String COOKIE_NAME = "kee-auth.oidc.credentials.cookie-name";
+            public static final String HEADER_NAME = "kee-auth.oidc.credentials.header-name";
+        }
+    }
     
-    // JWT
-    public static final String JWT_TIME_LEEWAY = "kee-auth.jwt.time-leeway";
-    public static final String JWT_KEYS = "kee-auth.jwt.keys";
-    // Mappings
-    public static final String CLAIM_MAPPING_ID = "kee-auth.jwt.claims.id";
-    public static final String CLAIM_MAPPING_EMAIL = "kee-auth.jwt.claims.email";
-    public static final String CLAIM_MAPPING_USERNAME = "kee-auth.jwt.claims.username";
-    public static final String CLAIM_MAPPING_SCOPE = "kee-auth.jwt.claims.scope";
-    // Keys
-    public static final String KEY_KID_POSTFIX = "kid";
-    public static final String KEY_ALG_POSTFIX = "alg";
-    public static final String KEY_N_POSTFIX = "n";
-    public static final String KEY_E_POSTFIX = "e";
-    public static final String KEY_X5C_POSTFIX = "x5c";
-    public static final String KEY_SECRET_POSTFIX = "secret";
-    public static final String KEY_CRV_POSTFIX = "crv";
-    public static final String KEY_X_POSTFIX = "x";
-    public static final String KEY_Y_POSTFIX = "y";
+    public static class Jwt {
+        public static final String TIME_LEEWAY = "kee-auth.jwt.time-leeway";
+        public static final String KEYS = "kee-auth.jwt.keys";
+        
+        public static class Claims {
+            public static final String ID_MAPPING = "kee-auth.jwt.claims.id";
+            public static final String EMAIL_MAPPING = "kee-auth.jwt.claims.email";
+            public static final String USERNAME_MAPPING = "kee-auth.jwt.claims.username";
+            public static final String SCOPE_MAPPING = "kee-auth.jwt.claims.scope";
+        }
+        
+        public static class Keys {
+            public static final String KID_POSTFIX = "kid";
+            public static final String ALG_POSTFIX = "alg";
+            public static final String N_POSTFIX = "n";
+            public static final String E_POSTFIX = "e";
+            public static final String X5C_POSTFIX = "x5c";
+            public static final String PUB_KEY_POSTFIX = "public-key";
+            public static final String SECRET_POSTFIX = "secret";
+            public static final String CRV_POSTFIX = "crv";
+            public static final String X_POSTFIX = "x";
+            public static final String Y_POSTFIX = "y";
+        }
+        
+    }
     
-    // Resolvers
-    public static final String CLAIM_MAPPING_ROLES = "kee-auth.role-resolvers.default.roles-mapping";
-    public static final String RESOLVER_ENABLED_PREFIX = "kee-auth.role-resolvers";
-    public static final String RESOLVER_ENABLED_POSTFIX = "enabled";
-    
+    public static class RoleResolvers {
+        public static final String DEFAULT_ROLES_MAPPING = "kee-auth.role-resolvers.default.roles-mapping";
+        
+        public static final String RESOLVER_ENABLED_PREFIX = "kee-auth.role-resolvers";
+        public static final String RESOLVER_ENABLED_POSTFIX = "enabled";
+    }
 }

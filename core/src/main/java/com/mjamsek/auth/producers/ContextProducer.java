@@ -23,14 +23,17 @@ package com.mjamsek.auth.producers;
 import com.kumuluz.ee.configuration.utils.ConfigurationUtil;
 import com.mjamsek.auth.common.config.ConfigKeys;
 import com.mjamsek.auth.context.AuthContext;
-import com.mjamsek.auth.utils.TokenUtil;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
+import com.mjamsek.auth.jwt.JwtClaimsValidator;
+import com.mjamsek.auth.jwt.JwtParser;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jwt.SignedJWT;
 
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import static com.mjamsek.auth.common.config.OIDCConstants.*;
 
 /**
  * @author Miha Jamsek
@@ -52,23 +55,37 @@ public class ContextProducer {
      */
     public static AuthContext produceContext(String jwt) {
         try {
-            Jws<Claims> tokenClaims = TokenUtil.parseJwt(jwt);
-            Claims claims = tokenClaims.getBody();
+    
+            JwtParser jwtParser = new JwtParser(jwt);
+            SignedJWT signedJWT = jwtParser.parseAndVerifyJwt();
+
+            boolean validToken = new JwtClaimsValidator(signedJWT)
+                .checkExpiration()
+                .checkIssuer()
+                .isValid();
+
+            if (!validToken) {
+                return AuthContext.Builder.newEmptyContext();
+            }
             
             AuthContext.Builder contextBuilder = AuthContext.Builder.newBuilder();
             contextBuilder.authenticated(true);
             contextBuilder.token(jwt);
-            contextBuilder.payload(claims);
-            
+            contextBuilder.payload(signedJWT.getJWTClaimsSet().getClaims());
+    
+            Map<String, Object> tokenClaims = signedJWT.getJWTClaimsSet().getClaims();
             Map<String, String> claimMappings = getClaimMappings();
-            contextBuilder.id(claims.get(claimMappings.get(CLAIM_KEY_ID), String.class));
-            contextBuilder.email(claims.get(claimMappings.get(CLAIM_KEY_EMAIL), String.class));
-            contextBuilder.username(claims.get(claimMappings.get(CLAIM_KEY_USERNAME), String.class));
-            contextBuilder.scope(claims.get(claimMappings.get(CLAIM_KEY_SCOPE), String.class));
-            
+            contextBuilder.id((String) tokenClaims.get(claimMappings.get(CLAIM_KEY_ID)));
+            contextBuilder.email((String) tokenClaims.get(claimMappings.get(CLAIM_KEY_EMAIL)));
+            contextBuilder.username((String) tokenClaims.get(claimMappings.get(CLAIM_KEY_USERNAME)));
+            contextBuilder.scope((String) tokenClaims.get(claimMappings.get(CLAIM_KEY_SCOPE)));
+
             return contextBuilder.build();
-        } catch (JwtException e) {
-            LOG.fine("Error verifying JWT: " + e.getMessage());
+        } catch (ParseException | JOSEException e) {
+            LOG.warning("Malformed token!");
+            return AuthContext.Builder.newEmptyContext();
+        } catch (RuntimeException e) {
+            LOG.fine("Invalid JWT signature!");
             return AuthContext.Builder.newEmptyContext();
         }
     }
@@ -76,10 +93,10 @@ public class ContextProducer {
     private static Map<String, String> getClaimMappings() {
         ConfigurationUtil configUtil = ConfigurationUtil.getInstance();
         Map<String, String> mappings = new HashMap<>();
-        mappings.put(CLAIM_KEY_ID, configUtil.get(ConfigKeys.CLAIM_MAPPING_ID).orElse("sub"));
-        mappings.put(CLAIM_KEY_USERNAME, configUtil.get(ConfigKeys.CLAIM_MAPPING_USERNAME).orElse("preferred_username"));
-        mappings.put(CLAIM_KEY_EMAIL, configUtil.get(ConfigKeys.CLAIM_MAPPING_EMAIL).orElse("email"));
-        mappings.put(CLAIM_KEY_SCOPE, configUtil.get(ConfigKeys.CLAIM_MAPPING_SCOPE).orElse("scope"));
+        mappings.put(CLAIM_KEY_ID, configUtil.get(ConfigKeys.Jwt.Claims.ID_MAPPING).orElse(JWT_SUB_CLAIM));
+        mappings.put(CLAIM_KEY_USERNAME, configUtil.get(ConfigKeys.Jwt.Claims.USERNAME_MAPPING).orElse(JWT_PREFERRED_USERNAME_CLAIM));
+        mappings.put(CLAIM_KEY_EMAIL, configUtil.get(ConfigKeys.Jwt.Claims.EMAIL_MAPPING).orElse(JWT_EMAIL_CLAIM));
+        mappings.put(CLAIM_KEY_SCOPE, configUtil.get(ConfigKeys.Jwt.Claims.SCOPE_MAPPING).orElse(JWT_SCOPE_CLAIM));
         return mappings;
     }
     
