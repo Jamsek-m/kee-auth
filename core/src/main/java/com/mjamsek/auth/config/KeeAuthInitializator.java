@@ -53,6 +53,7 @@ public class KeeAuthInitializator {
         CompletableFuture.runAsync(() -> {
             LOG.info("Autoconfiguring KeeAuth ...");
             loadWellKnownConfig();
+        }).thenRunAsync(() -> {
             loadJwks();
             LOG.info("KeeAuth autoconfiguration complete!");
         }).exceptionally(throwable -> {
