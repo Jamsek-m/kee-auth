@@ -20,6 +20,8 @@
  */
 package com.mjamsek.auth.apis;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kumuluz.ee.configuration.utils.ConfigurationUtil;
 import com.mjamsek.auth.common.config.ConfigDefaults;
 import com.mjamsek.auth.common.config.ConfigKeys;
@@ -36,6 +38,7 @@ import javax.ws.rs.core.Form;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.Base64;
@@ -51,6 +54,13 @@ import static com.mjamsek.auth.common.config.OIDCConstants.*;
 public class IdentityProviderApi {
     
     private static final Logger LOG = Logger.getLogger(IdentityProviderApi.class.getName());
+    
+    private static final ObjectMapper objectMapper;
+    
+    static {
+        objectMapper = new ObjectMapper().findAndRegisterModules();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
     
     public static TokenResponse getTokens() throws MissingConfigException, HttpCallException {
         String tokenEndpoint = getTokenEndpoint();
@@ -68,7 +78,8 @@ public class IdentityProviderApi {
             LOG.severe("Error fetching configuration from .well-known endpoint! Received response: " + errorResponse);
             throw new HttpCallException("Unable to retrieve OIDC .well-known endpoint!");
         } else {
-            return response.readEntity(TokenResponse.class);
+            String payload = response.readEntity(String.class);
+            return deserializeObject(payload, TokenResponse.class);
         }
     }
     
@@ -100,7 +111,8 @@ public class IdentityProviderApi {
             LOG.severe("Error fetching configuration from .well-known endpoint! Received response: " + errorResponse);
             throw new HttpCallException("Unable to retrieve OIDC .well-known endpoint!");
         } else {
-            return response.readEntity(WellKnownConfig.class);
+            String payload = response.readEntity(String.class);
+            return deserializeObject(payload, WellKnownConfig.class);
         }
     }
     
@@ -135,6 +147,14 @@ public class IdentityProviderApi {
                 }
                 return KeeAuthConfig.getTokenEndpoint();
             }).orElseThrow(() -> new MissingConfigException(ConfigKeys.Oidc.ClientCredentials.TOKEN_URL));
+    }
+    
+    private static <T> T deserializeObject(String payload, Class<T> type) {
+        try {
+            return objectMapper.readValue(payload, type);
+        } catch (IOException e) {
+            throw new HttpCallException("Unable to parse response!");
+        }
     }
     
 }
