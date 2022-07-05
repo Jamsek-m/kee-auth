@@ -34,6 +34,7 @@ import com.nimbusds.jose.jwk.JWKSet;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -43,6 +44,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.Base64;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.mjamsek.auth.common.config.OIDCConstants.*;
@@ -52,6 +54,10 @@ import static com.mjamsek.auth.common.config.OIDCConstants.*;
  * @since 2.0.0
  */
 public class IdentityProviderApi {
+    
+    private IdentityProviderApi() {
+    
+    }
     
     private static final Logger LOG = Logger.getLogger(IdentityProviderApi.class.getName());
     
@@ -67,19 +73,20 @@ public class IdentityProviderApi {
         Form formData = new Form(GRANT_TYPE_PARAM, GRANT_TYPE_CLIENT_CREDENTIALS_VALUE);
         String encodedCredentials = getEncodedCredentials();
         
-        Response response = ClientBuilder.newClient()
+        Invocation.Builder builder = ClientBuilder.newClient()
             .target(tokenEndpoint)
             .request(MediaType.APPLICATION_JSON)
-            .header(HttpHeaders.AUTHORIZATION, AUTHORIZATION_BASIC_PREFIX + " " + encodedCredentials)
-            .post(Entity.form(formData));
+            .header(HttpHeaders.AUTHORIZATION, AUTHORIZATION_BASIC_PREFIX + " " + encodedCredentials);
         
-        if (response.getStatus() >= Response.Status.BAD_REQUEST.getStatusCode()) {
-            String errorResponse = response.readEntity(String.class);
-            LOG.severe("Error fetching configuration from .well-known endpoint! Received response: " + errorResponse);
-            throw new HttpCallException("Unable to retrieve OIDC .well-known endpoint!");
-        } else {
-            String payload = response.readEntity(String.class);
-            return deserializeObject(payload, TokenResponse.class);
+        try (Response response = builder.post(Entity.form(formData))) {
+            if (response.getStatus() >= Response.Status.BAD_REQUEST.getStatusCode()) {
+                String errorResponse = response.readEntity(String.class);
+                LOG.log(Level.SEVERE, "Error fetching configuration from .well-known endpoint! Received response: {0}", new Object[]{errorResponse});
+                throw new HttpCallException("Unable to retrieve OIDC .well-known endpoint!");
+            } else {
+                String payload = response.readEntity(String.class);
+                return deserializeObject(payload, TokenResponse.class);
+            }
         }
     }
     
@@ -108,7 +115,7 @@ public class IdentityProviderApi {
         
         if (response.getStatus() >= Response.Status.BAD_REQUEST.getStatusCode()) {
             String errorResponse = response.readEntity(String.class);
-            LOG.severe("Error fetching configuration from .well-known endpoint! Received response: " + errorResponse);
+            LOG.log(Level.SEVERE, "Error fetching configuration from .well-known endpoint! Received response: {0}", new Object[]{errorResponse});
             throw new HttpCallException("Unable to retrieve OIDC .well-known endpoint!");
         } else {
             String payload = response.readEntity(String.class);
@@ -130,7 +137,7 @@ public class IdentityProviderApi {
         
         if (response.getStatus() >= Response.Status.BAD_REQUEST.getStatusCode()) {
             String errorResponse = response.readEntity(String.class);
-            LOG.severe("Error fetching JWKS! Received response: " + errorResponse);
+            LOG.log(Level.SEVERE, "Error fetching JWKS! Received response: {0}", new Object[]{errorResponse});
             throw new HttpCallException("Unable to retrieve JWKS!");
         } else {
             String responsePayload = response.readEntity(String.class);
