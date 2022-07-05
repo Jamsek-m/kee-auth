@@ -12,6 +12,7 @@ pipeline {
         COMMIT_MESSAGE = ""
         PROJECT_VERSION = ""
         COMMIT_URL = ""
+        MAVEN_HOME = tool 'mvn-3.6'
     }
 
     stages {
@@ -30,9 +31,8 @@ pipeline {
         }
         stage("SonarQube Analysis") {
             steps {
-                def mvn = tool 'mvn-3.6';
-                withSonarQubeEnv() {
-                    sh "${mvn}/bin/mvn clean verify sonar:sonar -Dsonar.projectKey=Jamsek-m_kee-auth_AYHN33_2ZY2MFTYvVt0R"
+                withSonarQubeEnv("sonarqube") {
+                    sh "${MAVEN_HOME}/bin/mvn clean verify sonar:sonar -Dsonar.projectKey=Jamsek-m_kee-auth_AYHN33_2ZY2MFTYvVt0R"
                 }
             }
         }
